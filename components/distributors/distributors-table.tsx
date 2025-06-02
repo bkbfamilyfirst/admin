@@ -116,110 +116,225 @@ export function DistributorsTable() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
-                  <div className="flex items-center gap-1">
-                    Name
-                    <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Keys Usage</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedDistributors.map((distributor) => (
-                <TableRow
-                  key={distributor.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors"
-                >
-                  <TableCell className="font-medium">{distributor.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{distributor.name}</div>
-                      <div className="text-xs text-gray-500">{distributor.contact}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{distributor.location}</TableCell>
-                  <TableCell>
+        {/* Mobile View */}
+        <div className="block sm:hidden">
+          <div className="space-y-3 p-4">
+            {sortedDistributors.map((distributor) => (
+              <div
+                key={distributor.id}
+                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-3"
+              >
+                {/* Header Row */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-electric-purple">{distributor.id}</span>
                     {distributor.status === "active" && (
-                      <Badge className="bg-gradient-to-r from-electric-green to-electric-cyan text-white">Active</Badge>
+                      <Badge className="bg-gradient-to-r from-electric-green to-electric-cyan text-white text-xs">
+                        Active
+                      </Badge>
                     )}
                     {distributor.status === "inactive" && (
-                      <Badge variant="outline" className="text-electric-orange border-electric-orange">
+                      <Badge variant="outline" className="text-electric-orange border-electric-orange text-xs">
                         Inactive
                       </Badge>
                     )}
                     {distributor.status === "blocked" && (
-                      <Badge className="bg-gradient-to-r from-electric-pink to-electric-red text-white">Blocked</Badge>
+                      <Badge className="bg-gradient-to-r from-electric-pink to-electric-red text-white text-xs">
+                        Blocked
+                      </Badge>
                     )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm font-medium">
-                        {distributor.keysActivated} / {distributor.keysAssigned}
-                      </span>
-                      <span className="text-xs text-electric-purple">Balance: {distributor.balance}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View</span>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-electric-purple">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-electric-green opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <KeyRound className="h-4 w-4" />
-                        <span className="sr-only">Assign Keys</span>
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-electric-purple">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="flex items-center gap-2">
-                            <Edit className="h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          {distributor.status === "active" ? (
-                            <DropdownMenuItem className="flex items-center gap-2 text-electric-orange">
-                              <UserX className="h-4 w-4" /> Deactivate
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem className="flex items-center gap-2 text-electric-green">
-                              <UserCheck className="h-4 w-4" /> Activate
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="flex items-center gap-2 text-electric-red">
-                            <Trash2 className="h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="z-[100]">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="flex items-center gap-2">
+                        <Edit className="h-4 w-4" /> Edit
+                      </DropdownMenuItem>
+                      {distributor.status === "active" ? (
+                        <DropdownMenuItem className="flex items-center gap-2 text-electric-orange">
+                          <UserX className="h-4 w-4" /> Deactivate
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem className="flex items-center gap-2 text-electric-green">
+                          <UserCheck className="h-4 w-4" /> Activate
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="flex items-center gap-2 text-electric-red">
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Distributor Info */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{distributor.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{distributor.contact}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">{distributor.location}</p>
+                </div>
+
+                {/* Key Usage */}
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Key Usage</span>
+                    <span className="text-sm font-bold text-electric-purple">
+                      {distributor.keysActivated} / {distributor.keysAssigned}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-electric-purple to-electric-blue h-2 rounded-full"
+                      style={{ width: `${(distributor.keysActivated / distributor.keysAssigned) * 100}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>Activated: {distributor.keysActivated}</span>
+                    <span>Balance: {distributor.balance}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 text-electric-blue border-electric-blue hover:bg-electric-blue/10"
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-gradient-to-r from-electric-green to-electric-cyan hover:opacity-90 text-white"
+                  >
+                    <KeyRound className="h-4 w-4 mr-1" />
+                    Assign Keys
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop/Tablet View */}
+        <div className="hidden sm:block">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
+                    <div className="flex items-center gap-1">
+                      Name
+                      <ArrowUpDown className="h-3 w-3" />
                     </div>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Keys Usage</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedDistributors.map((distributor) => (
+                  <TableRow
+                    key={distributor.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors"
+                  >
+                    <TableCell className="font-medium">{distributor.id}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{distributor.name}</div>
+                        <div className="text-xs text-gray-500">{distributor.contact}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{distributor.location}</TableCell>
+                    <TableCell>
+                      {distributor.status === "active" && (
+                        <Badge className="bg-gradient-to-r from-electric-green to-electric-cyan text-white">
+                          Active
+                        </Badge>
+                      )}
+                      {distributor.status === "inactive" && (
+                        <Badge variant="outline" className="text-electric-orange border-electric-orange">
+                          Inactive
+                        </Badge>
+                      )}
+                      {distributor.status === "blocked" && (
+                        <Badge className="bg-gradient-to-r from-electric-pink to-electric-red text-white">
+                          Blocked
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm font-medium">
+                          {distributor.keysActivated} / {distributor.keysAssigned}
+                        </span>
+                        <span className="text-xs text-electric-purple">Balance: {distributor.balance}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-electric-green opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                          <span className="sr-only">Assign Keys</span>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-electric-purple">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="z-[100]">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="flex items-center gap-2">
+                              <Edit className="h-4 w-4" /> Edit
+                            </DropdownMenuItem>
+                            {distributor.status === "active" ? (
+                              <DropdownMenuItem className="flex items-center gap-2 text-electric-orange">
+                                <UserX className="h-4 w-4" /> Deactivate
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem className="flex items-center gap-2 text-electric-green">
+                                <UserCheck className="h-4 w-4" /> Activate
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="flex items-center gap-2 text-electric-red">
+                              <Trash2 className="h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </CardContent>
     </Card>

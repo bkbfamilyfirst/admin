@@ -14,11 +14,11 @@ export default function DistributorsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="mt-8 grid gap-6 grid-cols-1 xl:grid-cols-3">
+        <div className="xl:col-span-2">
           <DistributorsTable />
         </div>
-        <div>
+        <div className="xl:col-span-1">
           <KeyAssignmentCard />
         </div>
       </div>
