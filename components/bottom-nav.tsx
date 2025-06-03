@@ -34,13 +34,13 @@ const navItems = [
     shortName: "Profile",
     color: "from-electric-green to-electric-blue",
   },
-  {
-    name: "Settings",
-    icon: Settings,
-    href: "/settings",
-    shortName: "Settings",
-    color: "from-electric-pink to-electric-purple",
-  },
+  // {
+  //   name: "Settings",
+  //   icon: Settings,
+  //   href: "/settings",
+  //   shortName: "Settings",
+  //   color: "from-electric-pink to-electric-purple",
+  // },
 ]
 
 export default function BottomNav() {

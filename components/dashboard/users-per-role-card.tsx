@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, UserCheck, Shield, Crown } from "lucide-react"
 
 const userRoles = [
-  { role: "Super Admin", count: 3, icon: Crown, color: "from-electric-purple to-electric-pink" },
+  { role: "Admin", count: 3, icon: Crown, color: "from-electric-purple to-electric-pink" },
   { role: "National Distributors", count: 24, icon: Shield, color: "from-electric-blue to-electric-cyan" },
-  { role: "Regional Managers", count: 156, icon: UserCheck, color: "from-electric-green to-electric-blue" },
-  { role: "End Users", count: 8945, icon: Users, color: "from-electric-orange to-electric-pink" },
+  { role: "State Supervisor", count: 156, icon: UserCheck, color: "from-electric-green to-electric-blue" },
+  { role: "Distributor", count: 8945, icon: Users, color: "from-electric-orange to-electric-pink" },
 ]
 
 export function UsersPerRoleCard() {

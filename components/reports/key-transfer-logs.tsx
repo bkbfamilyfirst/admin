@@ -174,14 +174,14 @@ export function KeyTransferLogs() {
             Key Transfer Logs
           </CardTitle>
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10"
             >
               <Eye className="mr-2 h-4 w-4" />
               View Details
-            </Button>
+            </Button> */}
             <Button
               size="sm"
               className="bg-gradient-to-r from-electric-orange to-electric-pink hover:opacity-90 text-white"

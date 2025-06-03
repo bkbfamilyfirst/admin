@@ -17,10 +17,10 @@ export function ReportsHeader() {
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button className="bg-white/20 text-white backdrop-blur-sm border border-white/30 hover:bg-white/30">
+            {/* <Button className="bg-white/20 text-white backdrop-blur-sm border border-white/30 hover:bg-white/30">
               <Filter className="mr-2 h-4 w-4" />
               Advanced Filters
-            </Button>
+            </Button> */}
             <Button className="bg-white text-electric-purple hover:bg-white/90">
               <Download className="mr-2 h-4 w-4" />
               Export Report

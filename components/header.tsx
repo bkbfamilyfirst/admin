@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
+import Logo from '../assets/icons/Logo.svg'
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -36,19 +38,20 @@ export default function Header() {
             {/* Logo Section */}
             <div className="flex items-center gap-3 sm:gap-6">
               <Link href="/" className="flex items-center gap-2">
-                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-gradient-to-r from-electric-purple to-electric-blue">
-                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
+                {/* <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-gradient-to-r from-electric-purple to-electric-blue"> */}
+                {/* <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-white" /> */}
+                <Image src={Logo} alt="ParentGuard Logo" width={45} height={45} />
+                {/* </div> */}
                 <span className="hidden font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent sm:inline-block text-sm sm:text-base">
-                  ParentGuard Admin
+                  Family First Admin
                 </span>
                 <span className="font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent sm:hidden text-sm">
-                  PG Admin
+                  FF Admin
                 </span>
               </Link>
 
               {/* Desktop Search */}
-              <div className="relative hidden lg:block">
+              {/* <div className="relative hidden lg:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-electric-purple" />
                 <Input
                   type="search"
@@ -57,13 +60,13 @@ export default function Header() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Actions Section */}
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Mobile Search */}
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 className="lg:hidden hover:bg-electric-purple/10 h-8 w-8 sm:h-10 sm:w-10"
@@ -75,10 +78,10 @@ export default function Header() {
                   <Search className="h-4 w-4 sm:h-5 sm:w-5 text-electric-purple" />
                 )}
                 <span className="sr-only">Search</span>
-              </Button>
+              </Button> */}
 
               {/* Notifications */}
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 className="relative hover:bg-electric-blue/10 h-8 w-8 sm:h-10 sm:w-10"
@@ -88,7 +91,7 @@ export default function Header() {
                   3
                 </Badge>
                 <span className="sr-only">Notifications</span>
-              </Button>
+              </Button> */}
 
               {/* Theme Toggle */}
               <ModeToggle />
@@ -113,9 +116,11 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-sm">Admin Profile</DropdownMenuItem>
-                  <DropdownMenuItem className="text-sm">System Settings</DropdownMenuItem>
-                  <DropdownMenuItem className="text-sm">Security Logs</DropdownMenuItem>
+                  <DropdownMenuItem asChild className="text-sm">
+                    <Link href="/profile">Admin Profile</Link>
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem className="text-sm">System Settings</DropdownMenuItem> */}
+                  {/* <DropdownMenuItem className="text-sm">Security Logs</DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-sm">Sign Out</DropdownMenuItem>
                 </DropdownMenuContent>

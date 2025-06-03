@@ -9,9 +9,9 @@ import BottomNav from "@/components/bottom-nav"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ParentGuard Admin Panel",
+  title: "Family First Admin Panel",
   description: "Admin control center for parental control ecosystem management",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({

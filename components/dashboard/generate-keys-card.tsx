@@ -33,7 +33,7 @@ export function GenerateKeysCard() {
             placeholder="Enter quantity"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1">
           <Button
             size="sm"
             className="bg-gradient-to-r from-electric-pink to-electric-orange hover:from-electric-pink/80 hover:to-electric-orange/80 text-white"
@@ -41,14 +41,14 @@ export function GenerateKeysCard() {
             <Plus className="h-4 w-4 mr-1" />
             Generate
           </Button>
-          <Button
+          {/* <Button
             size="sm"
             variant="outline"
             className="border-electric-pink/30 text-electric-pink hover:bg-electric-pink/10"
           >
             <Zap className="h-4 w-4 mr-1" />
             Bulk Gen
-          </Button>
+          </Button> */}
         </div>
         <div className="text-xs text-muted-foreground">Last generated: 500 keys (2 hours ago)</div>
       </CardContent>

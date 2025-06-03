@@ -1,9 +1,15 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Network, Plus, Search, SlidersHorizontal } from "lucide-react"
 
-export function DistributorsHeader() {
+interface DistributorsHeaderProps {
+  onAddDistributor: () => void
+}
+
+export function DistributorsHeader({ onAddDistributor }: DistributorsHeaderProps) {
   return (
     <Card className="overflow-hidden border-0 bg-gradient-to-r from-electric-blue via-electric-purple to-electric-pink animate-gradient-shift">
       <CardContent className="p-6 text-white">
@@ -18,11 +24,11 @@ export function DistributorsHeader() {
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button className="bg-white/20 text-white backdrop-blur-sm border border-white/30 hover:bg-white/30">
+            {/* <Button className="bg-white/20 text-white backdrop-blur-sm border border-white/30 hover:bg-white/30">
               <SlidersHorizontal className="mr-2 h-4 w-4" />
               Filter
-            </Button>
-            <Button className="bg-white text-electric-purple hover:bg-white/90">
+            </Button> */}
+            <Button onClick={onAddDistributor} className="bg-white text-electric-purple hover:bg-white/90">
               <Plus className="mr-2 h-4 w-4" />
               Add New Distributor
             </Button>
