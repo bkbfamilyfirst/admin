@@ -3,14 +3,14 @@ import { UserCheck, UserX, Key, Activity } from "lucide-react"
 
 const stats = [
   {
-    title: "Active Distributors",
+    title: "Active ND",
     value: "24",
     change: "+3 this month",
     icon: UserCheck,
     color: "from-electric-green to-electric-cyan",
   },
   {
-    title: "Inactive Distributors",
+    title: "Inactive ND",
     value: "5",
     change: "-2 this month",
     icon: UserX,

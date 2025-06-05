@@ -1,11 +1,23 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, UserCheck, Shield, Crown } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card"
+import {
+  Users,
+  UserCheck,
+  Shield,
+  Crown,
+  Store
+} from "lucide-react"
 
 const userRoles = [
   { role: "Admin", count: 3, icon: Crown, color: "from-electric-purple to-electric-pink" },
   { role: "National Distributors", count: 24, icon: Shield, color: "from-electric-blue to-electric-cyan" },
   { role: "State Supervisor", count: 156, icon: UserCheck, color: "from-electric-green to-electric-blue" },
   { role: "Distributor", count: 8945, icon: Users, color: "from-electric-orange to-electric-pink" },
+  { role: "Retailer", count: 12034, icon: Store, color: "from-electric-yellow to-electric-orange" }
 ]
 
 export function UsersPerRoleCard() {
@@ -32,7 +44,9 @@ export function UsersPerRoleCard() {
                 <div className={`rounded-full p-2 bg-gradient-to-r ${role.color}`}>
                   <role.icon className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">{role.role}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  {role.role}
+                </span>
               </div>
               <div className={`text-xl font-bold bg-gradient-to-r ${role.color} bg-clip-text text-transparent`}>
                 {role.count.toLocaleString()}
