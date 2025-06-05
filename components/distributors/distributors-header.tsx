@@ -19,8 +19,8 @@ export function DistributorsHeader({ onAddDistributor }: DistributorsHeaderProps
               <Network className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">National Distributors</h2>
-              <p className="mt-1 text-white/90">Manage your distribution network</p>
+              <h2 className="text-2xl font-bold">Manage National Distributors</h2>
+              <p className="mt-1 text-white/90 text-md">Manage your distribution network</p>
             </div>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">

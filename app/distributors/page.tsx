@@ -171,7 +171,7 @@ export default function DistributorsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="responsive-container py-4 sm:py-8">
       <DistributorsHeader onAddDistributor={handleOpenAddModal} />
 
       {/* Stats Overview */}

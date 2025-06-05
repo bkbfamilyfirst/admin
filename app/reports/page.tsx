@@ -5,7 +5,7 @@ import { ReportsFilters } from "@/components/reports/reports-filters"
 
 export default function ReportsPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="responsive-container py-4 sm:py-8">
       <ReportsHeader />
 
       {/* Stats Overview */}
