@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Search, RefreshCw, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
@@ -43,9 +49,9 @@ export function ReportsFilters() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Filter Controls */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="space-y-2">
+        {/* Filter Controls in a horizontal scrollable flex row on desktop */}
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px] space-y-2">
             <Label htmlFor="dateRange">Date Range</Label>
             <Select
               value={dateRange}
@@ -67,7 +73,7 @@ export function ReportsFilters() {
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex-1 min-w-[200px] space-y-2">
             <Label htmlFor="distributor">Distributor</Label>
             <Select
               value={distributor}
@@ -90,7 +96,8 @@ export function ReportsFilters() {
             </Select>
           </div>
 
-          <div className="space-y-2">
+          {/* Optional Status Filter — Uncomment if needed */}
+          {/* <div className="flex-1 min-w-[200px] space-y-2">
             <Label htmlFor="status">Transfer Status</Label>
             <Select
               value={status}
@@ -109,13 +116,17 @@ export function ReportsFilters() {
                 <SelectItem value="failed">Failed</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
-          <div className="space-y-2">
+          <div className="flex-1 min-w-[200px] space-y-2">
             <Label htmlFor="search">Search</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="search" placeholder="Search transfers..." className="pl-8 border-electric-orange/30" />
+              <Input
+                id="search"
+                placeholder="Search transfers..."
+                className="pl-8 border-electric-orange/30"
+              />
             </div>
           </div>
         </div>
@@ -137,7 +148,10 @@ export function ReportsFilters() {
             </div>
             <div className="flex flex-wrap gap-2">
               {activeFilters.map((filter, index) => (
-                <Badge key={index} className="bg-gradient-to-r from-electric-blue to-electric-purple text-white">
+                <Badge
+                  key={index}
+                  className="bg-gradient-to-r from-electric-blue to-electric-purple text-white"
+                >
                   {filter}
                   <button onClick={() => removeFilter(filter)} className="ml-2 hover:text-white/70">
                     <X className="h-3 w-3" />
@@ -149,12 +163,15 @@ export function ReportsFilters() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button className="bg-gradient-to-r from-electric-blue to-electric-purple hover:opacity-90">
             <Search className="mr-2 h-4 w-4" />
             Apply Filters
           </Button>
-          <Button variant="outline" className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10">
+          <Button
+            variant="outline"
+            className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             Reset
           </Button>

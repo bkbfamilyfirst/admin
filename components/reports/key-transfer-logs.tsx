@@ -1,11 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ArrowUpDown, CheckCircle, Clock, XCircle, Eye, Download, ArrowRight, Calendar, User, Key } from "lucide-react"
+import { ArrowUpDown, Download, ArrowRight, Calendar, User, Key, ChevronLeft, ChevronRight } from "lucide-react"
 
 // Sample data for key transfer logs
 const transferLogs = [
@@ -97,11 +96,57 @@ const transferLogs = [
     transferType: "bulk",
     notes: "Pending approval",
   },
+  {
+    id: "TXN009",
+    timestamp: "2024-01-14 13:30:42",
+    fromUser: "Admin",
+    toDistributor: "ParentControl Systems",
+    distributorId: "ND004",
+    keysTransferred: 350,
+    status: "completed",
+    transferType: "regular",
+    notes: "Standard allocation",
+  },
+  {
+    id: "TXN010",
+    timestamp: "2024-01-14 12:15:28",
+    fromUser: "Admin",
+    toDistributor: "FamilyShield Inc.",
+    distributorId: "ND005",
+    keysTransferred: 800,
+    status: "completed",
+    transferType: "bulk",
+    notes: "Monthly bulk transfer",
+  },
+  {
+    id: "TXN011",
+    timestamp: "2024-01-14 11:45:15",
+    fromUser: "Admin",
+    toDistributor: "TechGuard Solutions",
+    distributorId: "ND001",
+    keysTransferred: 250,
+    status: "pending",
+    transferType: "regular",
+    notes: "Awaiting confirmation",
+  },
+  {
+    id: "TXN012",
+    timestamp: "2024-01-14 10:20:33",
+    fromUser: "Admin",
+    toDistributor: "SecureFamily Networks",
+    distributorId: "ND002",
+    keysTransferred: 450,
+    status: "completed",
+    transferType: "bulk",
+    notes: "Priority allocation",
+  },
 ]
 
 export function KeyTransferLogs() {
   const [sortColumn, setSortColumn] = useState("timestamp")
   const [sortDirection, setSortDirection] = useState("desc")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -127,42 +172,22 @@ export function KeyTransferLogs() {
     return 0
   })
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-electric-green" />
-      case "pending":
-        return <Clock className="h-4 w-4 text-electric-orange" />
-      case "failed":
-        return <XCircle className="h-4 w-4 text-electric-red" />
-      default:
-        return <Clock className="h-4 w-4 text-gray-400" />
-    }
+  // Pagination logic
+  const totalPages = Math.ceil(sortedLogs.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentLogs = sortedLogs.slice(startIndex, endIndex)
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-gradient-to-r from-electric-green to-electric-cyan text-white">Completed</Badge>
-      case "pending":
-        return <Badge className="bg-gradient-to-r from-electric-orange to-electric-yellow text-white">Pending</Badge>
-      case "failed":
-        return <Badge className="bg-gradient-to-r from-electric-red to-electric-pink text-white">Failed</Badge>
-      default:
-        return <Badge variant="outline">Unknown</Badge>
-    }
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(1, prev - 1))
   }
 
-  const getTransferTypeBadge = (type: string) => {
-    return type === "bulk" ? (
-      <Badge variant="outline" className="text-electric-purple border-electric-purple">
-        Bulk
-      </Badge>
-    ) : (
-      <Badge variant="outline" className="text-electric-blue border-electric-blue">
-        Regular
-      </Badge>
-    )
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
   }
 
   return (
@@ -174,14 +199,6 @@ export function KeyTransferLogs() {
             Key Transfer Logs
           </CardTitle>
           <div className="flex gap-2">
-            {/* <Button
-              size="sm"
-              variant="outline"
-              className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </Button> */}
             <Button
               size="sm"
               className="bg-gradient-to-r from-electric-orange to-electric-pink hover:opacity-90 text-white"
@@ -217,13 +234,11 @@ export function KeyTransferLogs() {
                     Keys
                   </div>
                 </TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center">Type</TableHead>
                 <TableHead>Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedLogs.map((log) => (
+              {currentLogs.map((log) => (
                 <TableRow key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors">
                   <TableCell className="font-medium text-electric-purple">{log.id}</TableCell>
                   <TableCell>
@@ -253,13 +268,6 @@ export function KeyTransferLogs() {
                       <span className="text-xs text-gray-500">keys</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      {getStatusIcon(log.status)}
-                      {getStatusBadge(log.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">{getTransferTypeBadge(log.transferType)}</TableCell>
                   <TableCell>
                     <span className="text-sm text-gray-600 dark:text-gray-400">{log.notes}</span>
                   </TableCell>
@@ -267,6 +275,55 @@ export function KeyTransferLogs() {
               ))}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-gray-50 dark:bg-gray-800">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Showing {startIndex + 1} to {Math.min(endIndex, sortedLogs.length)} of {sortedLogs.length} entries
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10 disabled:opacity-50"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => goToPage(page)}
+                  className={
+                    currentPage === page
+                      ? "bg-gradient-to-r from-electric-orange to-electric-pink text-white"
+                      : "border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10"
+                  }
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="border-electric-blue/30 text-electric-blue hover:bg-electric-blue/10 disabled:opacity-50"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

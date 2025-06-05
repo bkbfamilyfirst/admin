@@ -74,14 +74,14 @@ export function KeyValidityCard() {
                 </div>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-gradient-to-r from-electric-purple/10 to-electric-blue/10">
+            {/* <div className="p-4 rounded-xl bg-gradient-to-r from-electric-purple/10 to-electric-blue/10">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Average Validity</span>
                 <span className="text-lg font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent">
                   14.2 months
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </CardContent>

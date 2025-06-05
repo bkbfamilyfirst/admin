@@ -23,7 +23,7 @@ export default function Home() {
         <UsersPerRoleCard />
         <KeyInventoryCard />
       </div>
-
+    
       {/* Third Row - Key Monitoring */}
       <div className="mt-4 sm:mt-6">
         <KeyValidityCard />
