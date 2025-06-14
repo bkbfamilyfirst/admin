@@ -15,26 +15,27 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { UserPlus, Save, X } from "lucide-react"
+import { NationalDistributor, addNationalDistributor } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
 
 interface AddDistributorModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onAddDistributor: (distributor: any) => void
+    onAddDistributor: (distributor: NationalDistributor) => void
 }
 
 export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: AddDistributorModalProps) {
     const [formData, setFormData] = useState({
         name: "",
         location: "",
-        contact: "",
         email: "",
         phone: "",
         status: "active",
-        initialKeys: "0",
-        notes: "",
+        assignedKeys: "0",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleInputChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
@@ -49,52 +50,74 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
 
         if (!formData.name.trim()) newErrors.name = "Company name is required"
         if (!formData.location.trim()) newErrors.location = "Location is required"
-        if (!formData.contact.trim()) newErrors.contact = "Contact person is required"
         if (!formData.email.trim()) newErrors.email = "Email is required"
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
         if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-        if (isNaN(Number(formData.initialKeys)) || Number(formData.initialKeys) < 0) {
-            newErrors.initialKeys = "Initial keys must be a valid number"
+        if (isNaN(Number(formData.assignedKeys)) || Number(formData.assignedKeys) < 0) {
+            newErrors.assignedKeys = "Initial keys must be a valid number"
         }
 
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateForm()) return
 
-        // Generate new distributor ID
-        const newId = `ND${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`
-
-        const newDistributor = {
-            id: newId,
-            name: formData.name,
-            location: formData.location,
-            contact: formData.contact,
-            email: formData.email,
-            phone: formData.phone,
-            status: formData.status,
-            keysAssigned: Number(formData.initialKeys),
-            keysActivated: 0,
-            balance: Number(formData.initialKeys),
-            notes: formData.notes,
+        setIsSubmitting(true)
+        try {
+            const newDistributorData = {
+                companyName: formData.name,
+                name: formData.name, // Assuming company name is used as contact name for now
+                email: formData.email,
+                phone: formData.phone,
+                location: formData.location,
+                status: formData.status,
+                assignedKeys: Number(formData.assignedKeys),
+                // notes: "", // Add notes field if needed from form
+            }
+            const response = await addNationalDistributor(newDistributorData)
+            toast({
+                title: "Success",
+                description: response.message || "National Distributor added successfully!",
+            })
+            // The backend should return the full NationalDistributor object with ID, createdAt, etc.
+            // For now, we'll construct a dummy one if backend doesn't return full object immediately
+            const createdDistributor: NationalDistributor = {
+                id: response.id || `nd_${Date.now()}`,
+                name: formData.name,
+                location: formData.location,
+                email: formData.email,
+                phone: formData.phone,
+                status: formData.status,
+                assignedKeys: Number(formData.assignedKeys),
+                usedKeys: 0,
+                balance: Number(formData.assignedKeys),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            }
+            onAddDistributor(createdDistributor)
+            handleClose()
+        } catch (error: any) {
+            console.error("Failed to add national distributor:", error)
+            toast({
+                title: "Error",
+                description: error.response?.data?.message || "Failed to add national distributor.",
+                variant: "destructive",
+            })
+        } finally {
+            setIsSubmitting(false)
         }
-
-        onAddDistributor(newDistributor)
-        handleClose()
     }
 
     const handleClose = () => {
         setFormData({
             name: "",
             location: "",
-            contact: "",
             email: "",
             phone: "",
             status: "active",
-            initialKeys: "0",
-            notes: "",
+            assignedKeys: "0",
         })
         setErrors({})
         onOpenChange(false)
@@ -164,20 +187,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                         </h3>
 
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="contact" className="text-sm font-medium">
-                                    Contact Person *
-                                </Label>
-                                <Input
-                                    id="contact"
-                                    value={formData.contact}
-                                    onChange={(e) => handleInputChange("contact", e.target.value)}
-                                    className={`border-electric-green/30 focus:border-electric-green focus:ring-electric-green/20 ${errors.contact ? "border-red-500" : ""
-                                        }`}
-                                    placeholder="e.g., John Smith"
-                                />
-                                {errors.contact && <p className="text-xs text-red-500">{errors.contact}</p>}
-                            </div>
+                            {/* Removed contact person input as it's not in the API response */}
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
@@ -237,37 +247,22 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="initialKeys" className="text-sm font-medium">
+                                <Label htmlFor="assignedKeys" className="text-sm font-medium">
                                     Initial Keys Allocation
                                 </Label>
                                 <Input
-                                    id="initialKeys"
+                                    id="assignedKeys"
                                     type="number"
                                     min="0"
-                                    value={formData.initialKeys}
-                                    onChange={(e) => handleInputChange("initialKeys", e.target.value)}
-                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.initialKeys ? "border-red-500" : ""
+                                    value={formData.assignedKeys}
+                                    onChange={(e) => handleInputChange("assignedKeys", e.target.value)}
+                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.assignedKeys ? "border-red-500" : ""
                                         }`}
                                     placeholder="0"
                                 />
-                                {errors.initialKeys && <p className="text-xs text-red-500">{errors.initialKeys}</p>}
+                                {errors.assignedKeys && <p className="text-xs text-red-500">{errors.assignedKeys}</p>}
                             </div>
                         </div>
-                    </div>
-
-                    {/* Additional Notes */}
-                    <div className="space-y-2">
-                        <Label htmlFor="notes" className="text-sm font-medium">
-                            Additional Notes (Optional)
-                        </Label>
-                        <Textarea
-                            id="notes"
-                            value={formData.notes}
-                            onChange={(e) => handleInputChange("notes", e.target.value)}
-                            className="border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 resize-none"
-                            rows={3}
-                            placeholder="Any additional information about this distributor..."
-                        />
                     </div>
                 </div>
 
@@ -278,10 +273,11 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                     </Button>
                     <Button
                         onClick={handleSubmit}
+                        disabled={isSubmitting}
                         className="bg-gradient-to-r from-electric-purple to-electric-blue hover:opacity-90 text-white"
                     >
                         <Save className="mr-2 h-4 w-4" />
-                        Add Distributor
+                        {isSubmitting ? "Adding..." : "Add Distributor"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

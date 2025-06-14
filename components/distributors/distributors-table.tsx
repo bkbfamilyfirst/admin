@@ -15,31 +15,20 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination } from "@/components/ui/pagination"
 import { Edit, MoreHorizontal, Shield, Trash2, UserCheck, UserX, Eye, KeyRound, ArrowUpDown, Ban } from "lucide-react"
-
-interface Distributor {
-  id: string
-  name: string
-  location: string
-  contact: string
-  email: string
-  phone: string
-  status: string
-  keysAssigned: number
-  keysActivated: number
-  balance: number
-  notes?: string
-}
+import { NationalDistributor, deactivateNationalDistributor, blockNationalDistributor, deleteNationalDistributor, editNationalDistributor } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
 
 interface DistributorsTableProps {
-  distributors: Distributor[]
-  onEdit: (distributor: Distributor) => void
-  onDelete: (distributor: Distributor) => void
+  distributors: NationalDistributor[]
+  onEdit: (distributor: NationalDistributor) => void
+  onDelete: (distributor: NationalDistributor) => void
   onStatusChange: (distributorId: string, newStatus: string) => void
+  onRefreshData: () => void
 }
 
 const ITEMS_PER_PAGE = 5
 
-export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChange }: DistributorsTableProps) {
+export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChange, onRefreshData }: DistributorsTableProps) {
   const [sortColumn, setSortColumn] = useState("name")
   const [sortDirection, setSortDirection] = useState("asc")
   const [currentPage, setCurrentPage] = useState(1)
@@ -96,14 +85,43 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
     }
   }
 
-  const getStatusActions = (distributor: Distributor) => {
+  const getStatusActions = (distributor: NationalDistributor) => {
     const actions = []
+
+    const handleStatusUpdate = async (ndId: string, newStatus: string) => {
+      try {
+        let response;
+        if (newStatus === "inactive") {
+          response = await deactivateNationalDistributor(ndId);
+        } else if (newStatus === "blocked") {
+          response = await blockNationalDistributor(ndId);
+        } else if (newStatus === "active") {
+          response = await editNationalDistributor(ndId, { status: newStatus });
+        }
+
+        if (response) {
+          toast({
+            title: "Success",
+            description: response.message || `Distributor status updated to ${newStatus}.`,
+          });
+          onStatusChange(ndId, newStatus); // Update local state for immediate UI reflection
+          onRefreshData(); // Refresh data from server to ensure consistency
+        }
+      } catch (error: any) {
+        console.error(`Failed to update distributor status to ${newStatus}:`, error);
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || `Failed to update distributor status to ${newStatus}.`,
+          variant: "destructive",
+        });
+      }
+    };
 
     if (distributor.status !== "active") {
       actions.push(
         <DropdownMenuItem
           key="activate"
-          onClick={() => onStatusChange(distributor.id, "active")}
+          onClick={() => handleStatusUpdate(distributor.id, "active")}
           className="flex items-center gap-2 text-electric-green"
         >
           <UserCheck className="h-4 w-4" /> Activate
@@ -115,7 +133,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
       actions.push(
         <DropdownMenuItem
           key="deactivate"
-          onClick={() => onStatusChange(distributor.id, "inactive")}
+          onClick={() => handleStatusUpdate(distributor.id, "inactive")}
           className="flex items-center gap-2 text-electric-orange"
         >
           <UserX className="h-4 w-4" /> Deactivate
@@ -127,7 +145,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
       actions.push(
         <DropdownMenuItem
           key="block"
-          onClick={() => onStatusChange(distributor.id, "blocked")}
+          onClick={() => handleStatusUpdate(distributor.id, "blocked")}
           className="flex items-center gap-2 text-electric-red"
         >
           <Ban className="h-4 w-4" /> Block
@@ -137,6 +155,25 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
 
     return actions
   }
+
+  const handleDeleteClick = async (distributor: NationalDistributor) => {
+    try {
+      await deleteNationalDistributor(distributor.id);
+      toast({
+        title: "Success",
+        description: `${distributor.name} deleted successfully.`,
+      });
+      onDelete(distributor); // Update local state for immediate UI reflection
+      onRefreshData(); // Refresh data from server to ensure consistency
+    } catch (error: any) {
+      console.error("Failed to delete national distributor:", error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || `Failed to delete ${distributor.name}.`,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card className="border-0 bg-white dark:bg-gray-900 shadow-md">
@@ -177,7 +214,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                       {getStatusActions(distributor)}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onDelete(distributor)}
+                        onClick={() => handleDeleteClick(distributor)}
                         className="flex items-center gap-2 text-electric-red"
                       >
                         <Trash2 className="h-4 w-4" /> Delete
@@ -189,7 +226,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                 {/* Distributor Info */}
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">{distributor.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{distributor.contact}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{distributor.email}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500">{distributor.location}</p>
                 </div>
 
@@ -198,7 +235,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Key Usage</span>
                     <span className="text-sm font-bold text-electric-purple">
-                      {distributor.keysActivated} / {distributor.keysAssigned}
+                      {distributor.usedKeys} / {distributor.assignedKeys}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
@@ -206,14 +243,14 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                       className="bg-gradient-to-r from-electric-purple to-electric-blue h-2 rounded-full"
                       style={{
                         width:
-                          distributor.keysAssigned > 0
-                            ? `${(distributor.keysActivated / distributor.keysAssigned) * 100}%`
+                          distributor.assignedKeys > 0
+                            ? `${(distributor.usedKeys / distributor.assignedKeys) * 100}%`
                             : "0%",
                       }}
                     ></div>
                   </div>
                   <div className="flex justify-between mt-2 text-xs text-gray-500">
-                    <span>Activated: {distributor.keysActivated}</span>
+                    <span>Activated: {distributor.usedKeys}</span>
                     <span>Balance: {distributor.balance}</span>
                   </div>
                 </div>
@@ -270,7 +307,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                     <TableCell>
                       <div>
                         <div className="font-medium">{distributor.name}</div>
-                        <div className="text-xs text-gray-500">{distributor.contact}</div>
+                        <div className="text-xs text-gray-500">{distributor.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>{distributor.location}</TableCell>
@@ -278,7 +315,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                     <TableCell className="text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-medium">
-                          {distributor.keysActivated} / {distributor.keysAssigned}
+                          {distributor.usedKeys} / {distributor.assignedKeys}
                         </span>
                         <span className="text-xs text-electric-purple">Balance: {distributor.balance}</span>
                       </div>
@@ -317,7 +354,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                             {getStatusActions(distributor)}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => onDelete(distributor)}
+                              onClick={() => handleDeleteClick(distributor)}
                               className="flex items-center gap-2 text-electric-red"
                             >
                               <Trash2 className="h-4 w-4" /> Delete

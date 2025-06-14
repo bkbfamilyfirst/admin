@@ -1,12 +1,55 @@
+'use client'
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Package, ArrowRight, ArrowLeft, Archive } from "lucide-react"
+import { getKeyInventory } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
 
 export function KeyInventoryCard() {
-  const totalGenerated = 15000
-  const transferred = 12847
-  const remaining = totalGenerated - transferred
-  const transferPercentage = (transferred / totalGenerated) * 100
+  const [mounted, setMounted] = useState(false)
+  const [inventoryData, setInventoryData] = useState<{
+    totalGenerated: number;
+    transferred: number;
+    remaining: number;
+    transferProgress: number;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setMounted(true)
+    const fetchData = async () => {
+      try {
+        const data = await getKeyInventory();
+        setInventoryData(data);
+      } catch (error: any) {
+        setError("Failed to load key inventory data.");
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to load key inventory data.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!mounted) return (
+    <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 animate-pulse">
+      <CardHeader>
+        <CardTitle className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-24 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+      </CardContent>
+    </Card>
+  );
+  if (loading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!inventoryData) return null;
 
   return (
     <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-xl transition-all duration-300">
@@ -31,7 +74,7 @@ export function KeyInventoryCard() {
               <span className="font-medium">Total Generated</span>
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent">
-              {totalGenerated.toLocaleString()}
+              {inventoryData.totalGenerated.toLocaleString()}
             </span>
           </div>
 
@@ -39,9 +82,9 @@ export function KeyInventoryCard() {
           <div className="space-y-3">
             <div className="flex justify-between text-sm font-medium">
               <span>Transfer Progress</span>
-              <span>{transferPercentage.toFixed(1)}%</span>
+              <span>{inventoryData.transferProgress?.toFixed(1) ?? 0}%</span>
             </div>
-            <Progress value={transferPercentage} className="h-3" />
+            <Progress value={inventoryData.transferProgress} className="h-3" />
           </div>
 
           {/* Transferred vs Remaining */}
@@ -52,7 +95,7 @@ export function KeyInventoryCard() {
                 <span className="text-sm font-medium">Transferred</span>
               </div>
               <div className="text-xl font-bold bg-gradient-to-r from-electric-green to-electric-cyan bg-clip-text text-transparent">
-                {transferred.toLocaleString()}
+                {inventoryData.transferred.toLocaleString()}
               </div>
             </div>
             <div className="p-4 rounded-xl bg-gradient-to-r from-electric-orange/10 to-electric-pink/10">
@@ -61,7 +104,7 @@ export function KeyInventoryCard() {
                 <span className="text-sm font-medium">Remaining</span>
               </div>
               <div className="text-xl font-bold bg-gradient-to-r from-electric-orange to-electric-pink bg-clip-text text-transparent">
-                {remaining.toLocaleString()}
+                {inventoryData.remaining.toLocaleString()}
               </div>
             </div>
           </div>

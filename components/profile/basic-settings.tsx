@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Settings, Lock, Eye, EyeOff, Save } from "lucide-react"
+import { Settings, Lock, Eye, EyeOff, Save, Loader2 } from "lucide-react"
+import { changeAdminPassword } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
 
 export function BasicSettings() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -16,26 +18,66 @@ export function BasicSettings() {
         newPassword: "",
         confirmPassword: "",
     })
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isSaving, setIsSaving] = useState(false)
 
     const handlePasswordChange = (field: string, value: string) => {
         setPasswordData((prev) => ({ ...prev, [field]: value }))
+
+        // Clear error when user starts typing
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: "" }))
+        }
     }
 
-    const handlePasswordSave = () => {
-        // Here you would typically validate and save the password
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            alert("New passwords don't match!")
+    const validatePasswordForm = () => {
+        const newErrors: Record<string, string> = {}
+
+        if (!passwordData.currentPassword) {
+            newErrors.currentPassword = "Current password is required."
+        }
+        if (!passwordData.newPassword) {
+            newErrors.newPassword = "New password is required."
+        } else if (passwordData.newPassword.length < 6) {
+            newErrors.newPassword = "New password must be at least 6 characters long."
+        }
+        if (!passwordData.confirmPassword) {
+            newErrors.confirmPassword = "Confirm new password is required."
+        } else if (passwordData.newPassword !== passwordData.confirmPassword) {
+            newErrors.confirmPassword = "New password and confirm password do not match."
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
+    const handlePasswordSave = async () => {
+        if (!validatePasswordForm()) {
             return
         }
 
-        // Reset form
-        setPasswordData({
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-        })
-
-        alert("Password updated successfully!")
+        setIsSaving(true)
+        try {
+            await changeAdminPassword(passwordData.currentPassword, passwordData.newPassword)
+            toast({
+                title: "Success",
+                description: "Password changed successfully!",
+            });
+            setPasswordData({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: "",
+            })
+        } catch (err: any) {
+            console.error("Failed to change password:", err)
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || "Failed to change password.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     return (
@@ -70,7 +112,7 @@ export function BasicSettings() {
                                     type={showCurrentPassword ? "text" : "password"}
                                     value={passwordData.currentPassword}
                                     onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
-                                    className="border-electric-orange/30 focus:border-electric-orange focus:ring-electric-orange/20 pr-10"
+                                    className={`border-electric-orange/30 focus:border-electric-orange focus:ring-electric-orange/20 pr-10 ${errors.currentPassword ? "border-red-500" : ""}`}
                                     placeholder="Enter current password"
                                 />
                                 <Button
@@ -87,6 +129,7 @@ export function BasicSettings() {
                                     )}
                                 </Button>
                             </div>
+                            {errors.currentPassword && <p className="text-xs text-red-500">{errors.currentPassword}</p>}
                         </div>
 
                         {/* New Password */}
@@ -100,7 +143,7 @@ export function BasicSettings() {
                                     type={showNewPassword ? "text" : "password"}
                                     value={passwordData.newPassword}
                                     onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
-                                    className="border-electric-pink/30 focus:border-electric-pink focus:ring-electric-pink/20 pr-10"
+                                    className={`border-electric-pink/30 focus:border-electric-pink focus:ring-electric-pink/20 pr-10 ${errors.newPassword ? "border-red-500" : ""}`}
                                     placeholder="Enter new password"
                                 />
                                 <Button
@@ -117,6 +160,7 @@ export function BasicSettings() {
                                     )}
                                 </Button>
                             </div>
+                            {errors.newPassword && <p className="text-xs text-red-500">{errors.newPassword}</p>}
                         </div>
 
                         {/* Confirm Password */}
@@ -130,7 +174,7 @@ export function BasicSettings() {
                                     type={showConfirmPassword ? "text" : "password"}
                                     value={passwordData.confirmPassword}
                                     onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
-                                    className="border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 pr-10"
+                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 pr-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
                                     placeholder="Confirm new password"
                                 />
                                 <Button
@@ -147,6 +191,7 @@ export function BasicSettings() {
                                     )}
                                 </Button>
                             </div>
+                            {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword}</p>}
                         </div>
 
                         {/* Password Requirements */}
@@ -164,11 +209,15 @@ export function BasicSettings() {
                         <div className="flex justify-end">
                             <Button
                                 onClick={handlePasswordSave}
-                                disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                                disabled={isSaving}
                                 className="bg-gradient-to-r from-electric-orange to-electric-pink hover:opacity-90 text-white"
                             >
-                                <Save className="mr-2 h-4 w-4" />
-                                Update Password
+                                {isSaving ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="mr-2 h-4 w-4" />
+                                )}
+                                {isSaving ? "Saving..." : "Update Password"}
                             </Button>
                         </div>
                     </div>

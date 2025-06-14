@@ -1,38 +1,86 @@
+'use client'
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowUpDown, TrendingUp, Users, Calendar } from "lucide-react"
+import { useEffect, useState } from "react"
+import { getTransferStats } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
+
+export function ReportsStats() {
+  const [mounted, setMounted] = useState(false)
+  const [transferStats, setTransferStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+    const fetchData = async () => {
+      try {
+        const data = await getTransferStats()
+        setTransferStats(data)
+      } catch (err: any) {
+        setError("Failed to load transfer statistics.")
+        toast({
+          title: "Error",
+          description: err.response?.data?.message || "Failed to load transfer statistics.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map(i => (
+          <Card key={i} className="overflow-hidden border-0 bg-white dark:bg-gray-900 animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+              <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  if (loading) return <div className="p-4">Loading...</div>
+  if (error) return <div className="p-4 text-red-500">{error}</div>
+  if (!transferStats) return null
 
 const stats = [
   {
     title: "Total Transfers Today",
-    value: "1,247",
-    change: "+23% from yesterday",
+      value: transferStats.transfersToday?.toLocaleString() ?? "N/A",
+      change: "", // Placeholder, no change data from API
     icon: ArrowUpDown,
     color: "from-electric-blue to-electric-cyan",
   },
   {
     title: "Weekly Transfer Volume",
-    value: "8,945",
-    change: "+15.3% from last week",
+      value: transferStats.weeklyTransfers?.toLocaleString() ?? "N/A",
+      change: "", // Placeholder
     icon: TrendingUp,
     color: "from-electric-green to-electric-blue",
   },
   {
     title: "Active Distributors",
-    value: "24",
-    change: "3 new this month",
+      value: transferStats.activeNDs?.toLocaleString() ?? "N/A",
+      change: "", // Placeholder
     icon: Users,
     color: "from-electric-purple to-electric-pink",
   },
   {
     title: "Average Daily Transfers",
-    value: "1,278",
-    change: "+8.7% this month",
+      value: transferStats.avgDailyTransfers?.toLocaleString() ?? "N/A",
+      change: "", // Placeholder
     icon: Calendar,
     color: "from-electric-orange to-electric-red",
   },
 ]
 
-export function ReportsStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (

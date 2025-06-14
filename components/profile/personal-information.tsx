@@ -1,31 +1,111 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { User, Mail, Phone, MapPin, Save, Edit } from "lucide-react"
+import { User, Mail, Phone, MapPin, Save, Edit, Loader2 } from "lucide-react"
+import { getAdminProfile, editAdminProfile, AdminProfile } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
 
 export function PersonalInformation() {
     const [isEditing, setIsEditing] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [isSaving, setIsSaving] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [formData, setFormData] = useState({
-        firstName: "John",
-        lastName: "Doe",
-        email: "admin@parentguard.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Admin Street, Tech City, TC 12345",
-        bio: "Experienced system administrator with 5+ years in parental control systems management.",
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        address: "",
+        bio: "",
     })
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            setLoading(true)
+            try {
+                const profile = await getAdminProfile()
+                setFormData({
+                    firstName: profile.firstName || (profile.name ? profile.name.split(' ')[0] : ''),
+                    lastName: profile.lastName || (profile.name ? profile.name.split(' ').slice(1).join(' ') : ''),
+                    email: profile.email,
+                    phone: profile.phone,
+                    address: (profile as any).address || '', // Cast to any to access address directly
+                    bio: (profile as any).bio || '',
+                })
+            } catch (err: any) {
+                setError("Failed to load profile data.")
+                toast({
+                    title: "Error",
+                    description: err.response?.data?.message || "Failed to load profile data.",
+                    variant: "destructive",
+                });
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchProfile()
+    }, [])
 
     const handleInputChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
-    const handleSave = () => {
-        setIsEditing(false)
-        // Here you would typically save to backend
+    const handleSave = async () => {
+        setIsSaving(true)
+        try {
+            const updatedData: Partial<AdminProfile> = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                bio: formData.bio,
+            };
+            await editAdminProfile(updatedData)
+            toast({
+                title: "Success",
+                description: "Profile updated successfully!",
+            });
+            setIsEditing(false)
+        } catch (err: any) {
+            console.error("Failed to save profile:", err)
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || "Failed to save profile.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    if (loading) {
+        return (
+            <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-md animate-pulse">
+                <CardHeader>
+                    <CardTitle className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded"></CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-20 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (error) {
+        return <div className="p-4 text-red-500">{error}</div>
     }
 
     return (
@@ -42,7 +122,13 @@ export function PersonalInformation() {
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsEditing(!isEditing)}
+                    onClick={() => {
+                        if (isEditing) {
+                            // Optionally revert changes if needed
+                            // For now, just cancel editing mode
+                        }
+                        setIsEditing(!isEditing);
+                    }}
                     className="border-electric-purple/30 text-electric-purple hover:bg-electric-purple/10"
                 >
                     <Edit className="mr-2 h-4 w-4" />
@@ -60,7 +146,7 @@ export function PersonalInformation() {
                             id="firstName"
                             value={formData.firstName}
                             onChange={(e) => handleInputChange("firstName", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             className="border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20"
                         />
                     </div>
@@ -72,7 +158,7 @@ export function PersonalInformation() {
                             id="lastName"
                             value={formData.lastName}
                             onChange={(e) => handleInputChange("lastName", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             className="border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20"
                         />
                     </div>
@@ -90,7 +176,7 @@ export function PersonalInformation() {
                             type="email"
                             value={formData.email}
                             onChange={(e) => handleInputChange("email", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             className="border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20"
                         />
                     </div>
@@ -104,7 +190,7 @@ export function PersonalInformation() {
                             id="phone"
                             value={formData.phone}
                             onChange={(e) => handleInputChange("phone", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             className="border-electric-green/30 focus:border-electric-green focus:ring-electric-green/20"
                         />
                     </div>
@@ -118,7 +204,7 @@ export function PersonalInformation() {
                             id="address"
                             value={formData.address}
                             onChange={(e) => handleInputChange("address", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             className="border-electric-orange/30 focus:border-electric-orange focus:ring-electric-orange/20"
                         />
                     </div>
@@ -131,7 +217,7 @@ export function PersonalInformation() {
                             id="bio"
                             value={formData.bio}
                             onChange={(e) => handleInputChange("bio", e.target.value)}
-                            disabled={!isEditing}
+                            disabled={!isEditing || isSaving}
                             rows={3}
                             className="border-electric-pink/30 focus:border-electric-pink focus:ring-electric-pink/20 resize-none"
                         />
@@ -143,10 +229,15 @@ export function PersonalInformation() {
                     <div className="flex justify-end">
                         <Button
                             onClick={handleSave}
+                            disabled={isSaving}
                             className="bg-gradient-to-r from-electric-purple to-electric-blue hover:opacity-90 text-white"
                         >
-                            <Save className="mr-2 h-4 w-4" />
-                            Save Changes
+                            {isSaving ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                            )}
+                            {isSaving ? "Saving..." : "Save Changes"}
                         </Button>
                     </div>
                 )}

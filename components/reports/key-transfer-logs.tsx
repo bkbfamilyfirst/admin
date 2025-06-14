@@ -1,152 +1,56 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ArrowUpDown, Download, ArrowRight, Calendar, User, Key, ChevronLeft, ChevronRight } from "lucide-react"
+import { KeyTransferLog, getKeyTransferLogs, exportKeyTransferLogs } from "@/lib/api"
+import { toast } from "@/components/ui/use-toast"
+import { format } from 'date-fns'
 
-// Sample data for key transfer logs
-const transferLogs = [
-  {
-    id: "TXN001",
-    timestamp: "2024-01-15 14:30:25",
-    fromUser: "Admin",
-    toDistributor: "TechGuard Solutions",
-    distributorId: "ND001",
-    keysTransferred: 500,
-    status: "completed",
-    transferType: "bulk",
-    notes: "Monthly key allocation",
-  },
-  {
-    id: "TXN002",
-    timestamp: "2024-01-15 13:45:12",
-    fromUser: "Admin",
-    toDistributor: "SecureFamily Networks",
-    distributorId: "ND002",
-    keysTransferred: 300,
-    status: "completed",
-    transferType: "regular",
-    notes: "Additional keys requested",
-  },
-  {
-    id: "TXN003",
-    timestamp: "2024-01-15 12:20:08",
-    fromUser: "Admin",
-    toDistributor: "KidSafe Technologies",
-    distributorId: "ND003",
-    keysTransferred: 750,
-    status: "pending",
-    transferType: "bulk",
-    notes: "Quarterly allocation",
-  },
-  {
-    id: "TXN004",
-    timestamp: "2024-01-15 11:15:33",
-    fromUser: "Admin",
-    toDistributor: "ParentControl Systems",
-    distributorId: "ND004",
-    keysTransferred: 1000,
-    status: "completed",
-    transferType: "bulk",
-    notes: "Large order fulfillment",
-  },
-  {
-    id: "TXN005",
-    timestamp: "2024-01-15 10:30:45",
-    fromUser: "Admin",
-    toDistributor: "FamilyShield Inc.",
-    distributorId: "ND005",
-    keysTransferred: 200,
-    status: "failed",
-    transferType: "regular",
-    notes: "Insufficient inventory",
-  },
-  {
-    id: "TXN006",
-    timestamp: "2024-01-14 16:45:22",
-    fromUser: "Admin",
-    toDistributor: "TechGuard Solutions",
-    distributorId: "ND001",
-    keysTransferred: 150,
-    status: "completed",
-    transferType: "regular",
-    notes: "Emergency allocation",
-  },
-  {
-    id: "TXN007",
-    timestamp: "2024-01-14 15:20:18",
-    fromUser: "Admin",
-    toDistributor: "SecureFamily Networks",
-    distributorId: "ND002",
-    keysTransferred: 400,
-    status: "completed",
-    transferType: "bulk",
-    notes: "Weekly allocation",
-  },
-  {
-    id: "TXN008",
-    timestamp: "2024-01-14 14:10:55",
-    fromUser: "Admin",
-    toDistributor: "KidSafe Technologies",
-    distributorId: "ND003",
-    keysTransferred: 600,
-    status: "pending",
-    transferType: "bulk",
-    notes: "Pending approval",
-  },
-  {
-    id: "TXN009",
-    timestamp: "2024-01-14 13:30:42",
-    fromUser: "Admin",
-    toDistributor: "ParentControl Systems",
-    distributorId: "ND004",
-    keysTransferred: 350,
-    status: "completed",
-    transferType: "regular",
-    notes: "Standard allocation",
-  },
-  {
-    id: "TXN010",
-    timestamp: "2024-01-14 12:15:28",
-    fromUser: "Admin",
-    toDistributor: "FamilyShield Inc.",
-    distributorId: "ND005",
-    keysTransferred: 800,
-    status: "completed",
-    transferType: "bulk",
-    notes: "Monthly bulk transfer",
-  },
-  {
-    id: "TXN011",
-    timestamp: "2024-01-14 11:45:15",
-    fromUser: "Admin",
-    toDistributor: "TechGuard Solutions",
-    distributorId: "ND001",
-    keysTransferred: 250,
-    status: "pending",
-    transferType: "regular",
-    notes: "Awaiting confirmation",
-  },
-  {
-    id: "TXN012",
-    timestamp: "2024-01-14 10:20:33",
-    fromUser: "Admin",
-    toDistributor: "SecureFamily Networks",
-    distributorId: "ND002",
-    keysTransferred: 450,
-    status: "completed",
-    transferType: "bulk",
-    notes: "Priority allocation",
-  },
-]
+interface KeyTransferLogsProps {
+  filters: {
+    startDate: string;
+    endDate: string;
+    distributorId: string;
+    status: string;
+    search: string;
+  };
+}
 
-export function KeyTransferLogs() {
+export function KeyTransferLogs({ filters }: KeyTransferLogsProps) {
+  const [transferLogs, setTransferLogs] = useState<KeyTransferLog[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [totalEntries, setTotalEntries] = useState(0)
   const [sortColumn, setSortColumn] = useState("timestamp")
-  const [sortDirection, setSortDirection] = useState("desc")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
+  const itemsPerPage = 10 // Changed to 10 based on the provided backend response
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await getKeyTransferLogs(currentPage, itemsPerPage, sortColumn, sortDirection, filters.search, filters.startDate, filters.endDate, filters.distributorId, filters.status)
+      setTransferLogs(response.logs)
+      setTotalEntries(response.total)
+    } catch (err: any) {
+      setError("Failed to load key transfer logs.")
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to load key transfer logs.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false)
+    }
+  }, [currentPage, itemsPerPage, sortColumn, sortDirection, filters.search, filters.startDate, filters.endDate, filters.distributorId, filters.status]);
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -155,28 +59,27 @@ export function KeyTransferLogs() {
       setSortColumn(column)
       setSortDirection("desc")
     }
+    setCurrentPage(1) // Reset to first page when sorting
   }
 
-  const sortedLogs = [...transferLogs].sort((a, b) => {
-    const aValue = a[sortColumn as keyof typeof a]
-    const bValue = b[sortColumn as keyof typeof b]
-
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
+  const handleExportClick = async () => {
+    try {
+      await exportKeyTransferLogs(filters);
+      toast({
+        title: "Success",
+        description: "Key transfer logs exported successfully.",
+      });
+    } catch (err: any) {
+      console.error("Error exporting key transfer logs:", err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to export key transfer logs.",
+        variant: "destructive",
+      });
     }
+  };
 
-    if (typeof aValue === "number" && typeof bValue === "number") {
-      return sortDirection === "asc" ? aValue - bValue : bValue - aValue
-    }
-
-    return 0
-  })
-
-  // Pagination logic
-  const totalPages = Math.ceil(sortedLogs.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentLogs = sortedLogs.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(totalEntries / itemsPerPage)
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)))
@@ -190,6 +93,9 @@ export function KeyTransferLogs() {
     setCurrentPage((prev) => Math.min(totalPages, prev + 1))
   }
 
+  if (loading) return <div className="p-4">Loading transfer logs...</div>
+  if (error) return <div className="p-4 text-red-500">{error}</div>
+
   return (
     <Card className="border-0 bg-white dark:bg-gray-900 shadow-md">
       <CardHeader className="pb-3">
@@ -202,6 +108,7 @@ export function KeyTransferLogs() {
             <Button
               size="sm"
               className="bg-gradient-to-r from-electric-orange to-electric-pink hover:opacity-90 text-white"
+              onClick={handleExportClick}
             >
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -238,32 +145,32 @@ export function KeyTransferLogs() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentLogs.map((log) => (
-                <TableRow key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors">
-                  <TableCell className="font-medium text-electric-purple">{log.id}</TableCell>
+              {transferLogs.map((log) => (
+                <TableRow key={log.transferId} className="hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors">
+                  <TableCell className="font-medium text-electric-purple">{log.transferId}</TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className="font-medium">{new Date(log.timestamp).toLocaleDateString()}</div>
-                      <div className="text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</div>
+                      <div className="font-medium">{format(new Date(log.timestamp), 'MM/dd/yyyy')}</div>
+                      <div className="text-gray-500">{format(new Date(log.timestamp), 'h:mm:ss a')}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-500">From:</span>
-                        <span className="font-medium text-electric-blue">{log.fromUser}</span>
+                        <span className="font-medium text-electric-blue">{log.from?.name || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <ArrowRight className="h-3 w-3 text-gray-400" />
-                        <span className="font-medium text-electric-green">{log.toDistributor}</span>
-                        <span className="text-xs text-gray-500">({log.distributorId})</span>
+                        <span className="font-medium text-electric-green">{log.to?.name || 'N/A'}</span>
+                        <span className="text-xs text-gray-500">({log.to?.id || 'N/A'})</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex flex-col items-center">
                       <span className="text-lg font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent">
-                        {log.keysTransferred.toLocaleString()}
+                        {log.count.toLocaleString()}
                       </span>
                       <span className="text-xs text-gray-500">keys</span>
                     </div>
@@ -278,9 +185,10 @@ export function KeyTransferLogs() {
         </div>
 
         {/* Pagination Controls */}
+        {totalEntries > itemsPerPage && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-gray-50 dark:bg-gray-800">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            Showing {startIndex + 1} to {Math.min(endIndex, sortedLogs.length)} of {sortedLogs.length} entries
+              Showing {currentPage * itemsPerPage - itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalEntries)} of {totalEntries} entries
           </div>
 
           <div className="flex items-center gap-2">
@@ -301,7 +209,7 @@ export function KeyTransferLogs() {
                   key={page}
                   variant={currentPage === page ? "default" : "outline"}
                   size="sm"
-                  onClick={() => goToPage(page)}
+                    onClick={() => goToPage(page as number)}
                   className={
                     currentPage === page
                       ? "bg-gradient-to-r from-electric-orange to-electric-pink text-white"
@@ -325,6 +233,20 @@ export function KeyTransferLogs() {
             </Button>
           </div>
         </div>
+        )}
+
+        {/* Empty State */}
+        {transferLogs.length === 0 && !loading && !error && (
+          <div className="text-center py-12">
+            <div className="mx-auto w-24 h-24 bg-gradient-to-r from-electric-orange/10 to-electric-pink/10 rounded-full flex items-center justify-center mb-4">
+              <ArrowUpDown className="h-12 w-12 text-electric-orange/50" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No transfer logs found</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              There are no key transfer activities to display at the moment.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

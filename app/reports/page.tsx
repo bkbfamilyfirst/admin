@@ -1,9 +1,23 @@
+'use client'
 import { ReportsHeader } from "@/components/reports/reports-header"
 import { ReportsStats } from "@/components/reports/reports-stats"
 import { KeyTransferLogs } from "@/components/reports/key-transfer-logs"
 import { ReportsFilters } from "@/components/reports/reports-filters"
+import { useState } from "react"
 
 export default function ReportsPage() {
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    distributorId: '',
+    status: '',
+    search: '',
+  });
+
+  const handleApplyFilters = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
   return (
     <div className="responsive-container py-4 sm:py-8">
       <ReportsHeader />
@@ -15,12 +29,12 @@ export default function ReportsPage() {
 
       {/* Filters */}
       <div className="mt-8">
-        <ReportsFilters />
+        <ReportsFilters onApplyFilters={handleApplyFilters} />
       </div>
 
       {/* Key Transfer Logs */}
       <div className="mt-8">
-        <KeyTransferLogs />
+        <KeyTransferLogs filters={filters} />
       </div>
     </div>
   )

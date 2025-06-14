@@ -13,30 +13,45 @@ interface PaginationProps {
 
 export function Pagination({ currentPage, totalPages, onPageChange, className }: PaginationProps) {
   const getVisiblePages = () => {
-    const delta = 2
-    const range = []
-    const rangeWithDots = []
+    const pagesToShow = 5; // Total number of page buttons to display (including 1, ..., totalPages)
+    const half = Math.floor(pagesToShow / 2);
+    let startPage = Math.max(2, currentPage - half);
+    let endPage = Math.min(totalPages - 1, currentPage + half);
 
-    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
-      range.push(i)
+    if (currentPage - half < 2) {
+      endPage = Math.min(totalPages - 1, pagesToShow - 1);
+    }
+    if (currentPage + half > totalPages - 1) {
+      startPage = Math.max(2, totalPages - pagesToShow + 2);
     }
 
-    if (currentPage - delta > 2) {
-      rangeWithDots.push(1, "...")
-    } else {
-      rangeWithDots.push(1)
+    const pages: (number | string)[] = [];
+
+    // Always add the first page
+    pages.push(1);
+
+    // Add leading ellipsis if needed
+    if (startPage > 2) {
+      pages.push("...");
     }
 
-    rangeWithDots.push(...range)
-
-    if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push("...", totalPages)
-    } else if (totalPages > 1) {
-      rangeWithDots.push(totalPages)
+    // Add pages in the calculated range
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
     }
 
-    return rangeWithDots
-  }
+    // Add trailing ellipsis if needed
+    if (endPage < totalPages - 1) {
+      pages.push("...");
+    }
+
+    // Always add the last page (if not the same as the first and not already added)
+    if (totalPages > 1 && !pages.includes(totalPages)) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   if (totalPages <= 1) return null
 

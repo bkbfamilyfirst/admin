@@ -15,26 +15,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Edit, Save, X } from "lucide-react"
-
-interface Distributor {
-    id: string
-    name: string
-    location: string
-    contact: string
-    email: string
-    phone: string
-    status: string
-    keysAssigned: number
-    keysActivated: number
-    balance: number
-    notes?: string
-}
+import { NationalDistributor } from "@/lib/api"
 
 interface EditDistributorModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onEditDistributor: (distributor: Distributor) => void
-    distributor: Distributor | null
+    onEditDistributor: (distributor: NationalDistributor) => void
+    distributor: NationalDistributor | null
 }
 
 export function EditDistributorModal({
@@ -46,12 +33,10 @@ export function EditDistributorModal({
     const [formData, setFormData] = useState({
         name: "",
         location: "",
-        contact: "",
         email: "",
         phone: "",
         status: "active",
-        keysAssigned: "0",
-        notes: "",
+        assignedKeys: "0",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -61,12 +46,10 @@ export function EditDistributorModal({
             setFormData({
                 name: distributor.name,
                 location: distributor.location,
-                contact: distributor.contact,
                 email: distributor.email,
                 phone: distributor.phone,
                 status: distributor.status,
-                keysAssigned: distributor.keysAssigned.toString(),
-                notes: distributor.notes || "",
+                assignedKeys: distributor.assignedKeys.toString(),
             })
         }
     }, [distributor])
@@ -84,12 +67,11 @@ export function EditDistributorModal({
 
         if (!formData.name.trim()) newErrors.name = "Company name is required"
         if (!formData.location.trim()) newErrors.location = "Location is required"
-        if (!formData.contact.trim()) newErrors.contact = "Contact person is required"
         if (!formData.email.trim()) newErrors.email = "Email is required"
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
         if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-        if (isNaN(Number(formData.keysAssigned)) || Number(formData.keysAssigned) < 0) {
-            newErrors.keysAssigned = "Keys assigned must be a valid number"
+        if (isNaN(Number(formData.assignedKeys)) || Number(formData.assignedKeys) < 0) {
+            newErrors.assignedKeys = "Keys assigned must be a valid number"
         }
 
         setErrors(newErrors)
@@ -99,17 +81,15 @@ export function EditDistributorModal({
     const handleSubmit = () => {
         if (!validateForm() || !distributor) return
 
-        const updatedDistributor: Distributor = {
+        const updatedDistributor: NationalDistributor = {
             ...distributor,
             name: formData.name,
             location: formData.location,
-            contact: formData.contact,
             email: formData.email,
             phone: formData.phone,
             status: formData.status,
-            keysAssigned: Number(formData.keysAssigned),
-            balance: Number(formData.keysAssigned) - distributor.keysActivated,
-            notes: formData.notes,
+            assignedKeys: Number(formData.assignedKeys),
+            balance: Number(formData.assignedKeys) - distributor.usedKeys,
         }
 
         onEditDistributor(updatedDistributor)
@@ -183,21 +163,6 @@ export function EditDistributorModal({
                         </h3>
 
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="edit-contact" className="text-sm font-medium">
-                                    Contact Person *
-                                </Label>
-                                <Input
-                                    id="edit-contact"
-                                    value={formData.contact}
-                                    onChange={(e) => handleInputChange("contact", e.target.value)}
-                                    className={`border-electric-green/30 focus:border-electric-green focus:ring-electric-green/20 ${errors.contact ? "border-red-500" : ""
-                                        }`}
-                                    placeholder="e.g., John Smith"
-                                />
-                                {errors.contact && <p className="text-xs text-red-500">{errors.contact}</p>}
-                            </div>
-
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="edit-email" className="text-sm font-medium">
@@ -257,37 +222,22 @@ export function EditDistributorModal({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="edit-keysAssigned" className="text-sm font-medium">
+                                <Label htmlFor="edit-assignedKeys" className="text-sm font-medium">
                                     Keys Assigned
                                 </Label>
                                 <Input
-                                    id="edit-keysAssigned"
+                                    id="edit-assignedKeys"
                                     type="number"
                                     min="0"
-                                    value={formData.keysAssigned}
-                                    onChange={(e) => handleInputChange("keysAssigned", e.target.value)}
-                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.keysAssigned ? "border-red-500" : ""
+                                    value={formData.assignedKeys}
+                                    onChange={(e) => handleInputChange("assignedKeys", e.target.value)}
+                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.assignedKeys ? "border-red-500" : ""
                                         }`}
                                     placeholder="0"
                                 />
-                                {errors.keysAssigned && <p className="text-xs text-red-500">{errors.keysAssigned}</p>}
+                                {errors.assignedKeys && <p className="text-xs text-red-500">{errors.assignedKeys}</p>}
                             </div>
                         </div>
-                    </div>
-
-                    {/* Additional Notes */}
-                    <div className="space-y-2">
-                        <Label htmlFor="edit-notes" className="text-sm font-medium">
-                            Additional Notes (Optional)
-                        </Label>
-                        <Textarea
-                            id="edit-notes"
-                            value={formData.notes}
-                            onChange={(e) => handleInputChange("notes", e.target.value)}
-                            className="border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 resize-none"
-                            rows={3}
-                            placeholder="Any additional information about this distributor..."
-                        />
                     </div>
                 </div>
 
