@@ -5,19 +5,23 @@ import { Progress } from "@/components/ui/progress"
 import { Clock, Calendar, AlertTriangle, CheckCircle } from "lucide-react"
 import { getKeyValidityTimeline } from "@/lib/api"
 import { toast } from "@/components/ui/use-toast"
+import { useDashboard } from "./dashboard-context"
 
 export function KeyValidityCard() {
   const [mounted, setMounted] = useState(false)
   const [data, setData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const { refreshTrigger } = useDashboard()
 
   useEffect(() => {
     setMounted(true)
     const fetchData = async () => {
+      setLoading(true)
       try {
         const res = await getKeyValidityTimeline()
         setData(res)
+        setError(null)
       } catch (error: any) {
         setError("Failed to load key validity data.")
         toast({
@@ -30,7 +34,7 @@ export function KeyValidityCard() {
       }
     }
     fetchData()
-  }, [])
+  }, [refreshTrigger]) // Add refreshTrigger as dependency
 
   if (!mounted) return (
     <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 animate-pulse">

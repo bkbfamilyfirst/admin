@@ -5,6 +5,7 @@ import Header from "@/components/header"
 import BottomNav from "@/components/bottom-nav"
 import { AuthGuard } from "@/components/AuthGuard"
 import { usePathname } from "next/navigation"
+import { Toaster } from "@/components/ui/sonner"
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
         </main>
         {!isLoginPage && <BottomNav />}
       </div>
+      <Toaster />
     </ThemeProvider>
   )
 } 

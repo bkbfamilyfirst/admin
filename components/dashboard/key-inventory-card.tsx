@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { Package, ArrowRight, ArrowLeft, Archive } from "lucide-react"
 import { getKeyInventory } from "@/lib/api"
 import { toast } from "@/components/ui/use-toast"
+import { useDashboard } from "./dashboard-context"
 
 export function KeyInventoryCard() {
   const [mounted, setMounted] = useState(false)
@@ -16,13 +17,16 @@ export function KeyInventoryCard() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { refreshTrigger } = useDashboard()
 
   useEffect(() => {
     setMounted(true)
     const fetchData = async () => {
+      setLoading(true);
       try {
         const data = await getKeyInventory();
         setInventoryData(data);
+        setError(null);
       } catch (error: any) {
         setError("Failed to load key inventory data.");
         toast({
@@ -35,7 +39,7 @@ export function KeyInventoryCard() {
       }
     };
     fetchData();
-  }, []);
+  }, [refreshTrigger]); // Add refreshTrigger as dependency
 
   if (!mounted) return (
     <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 animate-pulse">

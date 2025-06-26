@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Key, TrendingUp } from "lucide-react"
 import { getAdminSummary } from "@/lib/api"
 import { toast } from "@/components/ui/use-toast"
+import { useDashboard } from "./dashboard-context"
 
 export function TotalKeysCard() {
   const [mounted, setMounted] = useState(false)
@@ -15,13 +16,16 @@ export function TotalKeysCard() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { refreshTrigger } = useDashboard()
 
   useEffect(() => {
     setMounted(true)
     const fetchData = async () => {
+      setLoading(true)
       try {
         const res = await getAdminSummary()
         setData(res.totalKeys)
+        setError(null)
       } catch (err: any) {
         setError("Failed to load total keys data.")
         toast({
@@ -34,7 +38,7 @@ export function TotalKeysCard() {
       }
     }
     fetchData()
-  }, [])
+  }, [refreshTrigger]) // Add refreshTrigger as dependency
 
   if (!mounted) {
     return (

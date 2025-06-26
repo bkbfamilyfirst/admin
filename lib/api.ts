@@ -380,4 +380,17 @@ export const changeAdminPassword = async (currentPassword: string, newPassword: 
   }
 };
 
-export default api; 
+export const generateKeys = async (count: number, keyLength: number = 16) => {
+  try {
+    const response = await api.post('/admin/generate-keys', {
+      count,
+      keyLength,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error generating keys:', error);
+    throw error;
+  }
+};
+
+export default api;

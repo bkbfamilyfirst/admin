@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { UserCheck, UserX, Key, Activity } from "lucide-react"
-import { getAdminSummary } from "@/lib/api"
+import { getAdminSummary, getNationalDistributors } from "@/lib/api"
 import { toast } from "@/components/ui/use-toast"
 
 export function DistributorsStats() {
   const [mounted, setMounted] = useState(false)
   const [data, setData] = useState<any>(null)
+  const [distributors, setDistributors] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,8 +16,12 @@ export function DistributorsStats() {
     setMounted(true)
     const fetchData = async () => {
       try {
-        const res = await getAdminSummary()
-        setData(res)
+        const [summaryRes, distributorsRes] = await Promise.all([
+          getAdminSummary(),
+          getNationalDistributors()
+        ])
+        setData(summaryRes)
+        setDistributors(distributorsRes)
       } catch (err: any) {
         setError("Failed to load distributor stats.")
         toast({
@@ -49,32 +54,38 @@ export function DistributorsStats() {
   if (error) return <div className="p-4 text-red-500">{error}</div>
   if (!data) return null
 
-  // Only nd is available, so show that. Others fallback to 0 or N/A.
+  // Calculate stats from distributors data
+  const activeNDs = distributors.filter(d => d.status === 'active').length
+  const inactiveNDs = distributors.filter(d => d.status === 'inactive' || d.status === 'blocked').length
+  const totalKeysAssigned = distributors.reduce((sum, d) => sum + (d.assignedKeys || 0), 0)
+  const totalKeysUsed = distributors.reduce((sum, d) => sum + (d.usedKeys || 0), 0)
+  const activationRate = totalKeysAssigned > 0 ? Math.round((totalKeysUsed / totalKeysAssigned) * 100) : 0
+
   const stats = [
     {
       title: "Active ND",
-      value: data.nd?.toLocaleString() ?? 0,
-      change: "-", // No change data
+      value: activeNDs.toLocaleString(),
+      change: "-",
       icon: UserCheck,
       color: "from-electric-green to-electric-cyan",
     },
     {
       title: "Inactive ND",
-      value: "N/A",
+      value: inactiveNDs > 0 ? inactiveNDs.toLocaleString() : "N/A",
       change: "-",
       icon: UserX,
       color: "from-electric-orange to-electric-pink",
     },
     {
       title: "Keys Assigned",
-      value: data.totalKeys?.total?.toLocaleString() ?? 0,
+      value: totalKeysAssigned.toLocaleString(),
       change: "-",
       icon: Key,
       color: "from-electric-purple to-electric-blue",
     },
     {
       title: "Activation Rate",
-      value: data.totalActivations && data.totalKeys && data.totalKeys.total > 0 ? `${Math.round((data.totalActivations.total / data.totalKeys.total) * 100)}%` : "0%",
+      value: `${activationRate}%`,
       change: "-",
       icon: Activity,
       color: "from-electric-blue to-electric-cyan",
