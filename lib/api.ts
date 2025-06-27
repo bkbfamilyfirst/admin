@@ -167,6 +167,18 @@ export const transferKeysToNationalDistributor = async (ndId: string, keysToTran
   }
 };
 
+export interface AddNDResponse {
+  message: string;
+  nd: {
+    id: string;
+    name: string;
+    email: string;
+    defaultPassword: string;
+    companyName: string;
+    notes: string;
+  };
+}
+
 export const addNationalDistributor = async (distributorData: {
   companyName: string;
   name: string;
@@ -176,7 +188,7 @@ export const addNationalDistributor = async (distributorData: {
   status: string;
   assignedKeys: number;
   notes?: string;
-}) => {
+}): Promise<AddNDResponse> => {
   try {
     const response = await api.post('/admin/nd', distributorData);
     return response.data;
