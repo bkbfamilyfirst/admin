@@ -1,3 +1,4 @@
+'use client'
 import { WelcomeCard } from "@/components/welcome-card"
 import { TotalKeysCard } from "@/components/dashboard/total-keys-card"
 import { TotalActivationsCard } from "@/components/dashboard/total-activations-card"
@@ -6,6 +7,7 @@ import { KeyInventoryCard } from "@/components/dashboard/key-inventory-card"
 import { GenerateKeysCard } from "@/components/dashboard/generate-keys-card"
 import { KeyValidityCard } from "@/components/dashboard/key-validity-card"
 import { DashboardProvider } from "@/components/dashboard/dashboard-context"
+import { RoleListCard } from "@/components/dashboard/role-list-card"
 
 export default function Home() {
   return (
@@ -29,6 +31,14 @@ export default function Home() {
         {/* Third Row - Key Monitoring */}
         <div className="mt-4 sm:mt-6">
           <KeyValidityCard />
+        </div>
+
+        {/* Fourth Row - Recent Entries by Role */}
+        <div className="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-2">
+          <RoleListCard role="nd" title="National Distributors" />
+          <RoleListCard role="ss" title="State Supervisors" />
+          <RoleListCard role="db" title="Distributors" />
+          <RoleListCard role="retailer" title="Retailers" />
         </div>
       </div>
     </DashboardProvider>

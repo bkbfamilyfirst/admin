@@ -34,7 +34,7 @@ api.interceptors.response.use(
 
     // Check if the error is 401 Unauthorized and if it's an expired token
     // Assuming backend sends a flag like `error.response.data.expired` for expired access tokens
-    if (error.response.status === 401 && error.response.data.expired && !originalRequest._retry) {
+  if (error.response && error.response.status === 401 && error.response.data?.expired && !originalRequest._retry) {
       originalRequest._retry = true; // Mark the request to prevent infinite loops
 
       try {
@@ -62,6 +62,33 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Fetch paginated list for ND, SS, DB, Retailer roles
+ */
+export const getRoleListPaginated = async (
+  role: "nd" | "ss" | "db" | "retailer",
+  page: number = 1,
+  limit: number = 10
+) => {
+  const endpointMap = {
+    nd: "/admin/nd-list-paginated",
+    ss: "/admin/ss-list-paginated",
+    db: "/admin/db-list-paginated",
+    retailer: "/admin/retailer-list-paginated",
+  };
+  const endpoint = endpointMap[role];
+  try {
+    console.log(`${API_BASE_URL}${endpoint}`)
+    const response = await api.get(`${API_BASE_URL}${endpoint}`, {
+      params: { page, limit },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching ${role} list:`, error);
+    throw error;
+  }
+};
 
 export interface NationalDistributor {
   id: string;
@@ -402,6 +429,17 @@ export const generateKeys = async (count: number, keyLength: number = 16) => {
   } catch (error) {
     console.error('Error generating keys:', error);
     throw error;
+  }
+};
+
+
+/**
+ * Logs out the user by removing the access token and optionally redirecting to login page.
+ */
+export const logout = (redirect: boolean = true) => {
+  localStorage.removeItem('accessToken');
+  if (redirect) {
+    window.location.href = '/login';
   }
 };
 

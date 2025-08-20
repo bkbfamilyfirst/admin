@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Logo from '../assets/icons/Logo.svg'
-import api from '@/lib/api'
+import api, { logout } from '@/lib/api'
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -129,10 +129,9 @@ export default function Header() {
                         await api.post('/auth/logout');
                       } catch (error) {
                         console.error('Logout failed:', error);
-                        // Even if logout fails on backend, still clear local token and redirect for user experience
+                      } finally {
+                        logout();
                       }
-                      localStorage.removeItem('accessToken');
-                      window.location.href = '/login';
                     }
                   }}>Sign Out</DropdownMenuItem>
                 </DropdownMenuContent>
