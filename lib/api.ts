@@ -1,3 +1,20 @@
+/**
+ * Get last key generation info
+ */
+export interface LastKeyGeneration {
+  count: number;
+  generatedAt: string;
+}
+
+export const getLastKeyGeneration = async (): Promise<LastKeyGeneration> => {
+  try {
+    const response = await api.get('/admin/last-key-generation');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching last key generation:', error);
+    throw error;
+  }
+};
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.familyfirst.com';

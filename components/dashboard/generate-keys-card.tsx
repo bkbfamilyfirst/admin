@@ -5,15 +5,34 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { KeyRound, Plus, Zap, Loader2 } from "lucide-react"
-import { useState } from "react"
-import { generateKeys } from "@/lib/api"
+import { useState, useEffect } from "react"
+import { generateKeys, getLastKeyGeneration, LastKeyGeneration } from "@/lib/api"
 import { toast } from "sonner"
 import { useDashboard } from "./dashboard-context"
 
 export function GenerateKeysCard() {
   const [keyCount, setKeyCount] = useState("100")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [lastGen, setLastGen] = useState<LastKeyGeneration | null>(null)
+  const [lastGenLoading, setLastGenLoading] = useState(true)
+  const [lastGenError, setLastGenError] = useState<string | null>(null)
   const { refreshDashboard } = useDashboard()
+
+  useEffect(() => {
+    const fetchLastGen = async () => {
+      setLastGenLoading(true)
+      setLastGenError(null)
+      try {
+        const data = await getLastKeyGeneration()
+        setLastGen(data)
+      } catch (err: any) {
+        setLastGenError("Failed to fetch last generated info")
+      } finally {
+        setLastGenLoading(false)
+      }
+    }
+    fetchLastGen()
+  }, [])
 
   const handleGenerateKeys = async () => {
     const count = parseInt(keyCount)
@@ -95,8 +114,35 @@ export function GenerateKeysCard() {
             Bulk Gen
           </Button> */}
         </div>
-        <div className="text-xs text-muted-foreground">Last generated: 500 keys (2 hours ago)</div>
+        {/* <div className="text-xs text-muted-foreground">
+          {lastGenLoading ? (
+            <span>Loading last generated info...</span>
+          ) : lastGenError ? (
+            <span className="text-red-500">{lastGenError}</span>
+          ) : lastGen ? (
+            <span>
+              Last generated: {lastGen.count} keys ({formatTimeAgo(lastGen.generatedAt)})
+            </span>
+          ) : (
+            <span>No key generation data available.</span>
+          )}
+        </div> */}
       </CardContent>
     </Card>
   )
+}
+
+// Helper function to format time ago
+function formatTimeAgo(dateString: string) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  if (diffSec < 60) return `${diffSec} seconds ago`
+  const diffMin = Math.floor(diffSec / 60)
+  if (diffMin < 60) return `${diffMin} minutes ago`
+  const diffHr = Math.floor(diffMin / 60)
+  if (diffHr < 24) return `${diffHr} hours ago`
+  const diffDay = Math.floor(diffHr / 24)
+  return `${diffDay} days ago`
 }
