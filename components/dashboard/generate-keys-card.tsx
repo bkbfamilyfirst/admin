@@ -38,26 +38,30 @@ export function GenerateKeysCard() {
     const count = parseInt(keyCount)
     
     if (!count || count <= 0) {
-      toast.error("Please enter a valid number of keys to generate")
+  console.log("Triggering toast: invalid key count")
+  toast.error("Please enter a valid number of keys to generate")
       return
     }
 
     if (count > 10000) {
-      toast.error("Cannot generate more than 10,000 keys at once")
+  console.log("Triggering toast: too many keys")
+  toast.error("Cannot generate more than 10,000 keys at once")
       return
     }
 
     setIsGenerating(true)
     try {
       const response = await generateKeys(count, 16) // 16 character keys
-      toast.success(`Successfully generated ${count} keys!`)
+  console.log("Triggering toast: success", count)
+  toast.success(`Successfully generated ${count} keys!`)
       
       // Refresh all dashboard components
       refreshDashboard()
       
     } catch (error: any) {
       console.error('Error generating keys:', error)
-      toast.error(error.response?.data?.message || "Failed to generate keys")
+  console.log("Triggering toast: error", error)
+  toast.error(error.response?.data?.message || "Failed to generate keys")
     } finally {
       setIsGenerating(false)
     }

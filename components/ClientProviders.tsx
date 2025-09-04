@@ -6,6 +6,7 @@ import BottomNav from "@/components/bottom-nav"
 import { AuthGuard } from "@/components/AuthGuard"
 import { usePathname } from "next/navigation"
 import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner"
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

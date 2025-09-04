@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { UserPlus, Save, X, Copy } from "lucide-react"
 import { NationalDistributor, addNationalDistributor, AddNDResponse } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { NDCredentialsModal } from "./nd-credentials-modal"
 
 interface AddDistributorModalProps {
@@ -33,6 +33,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
         phone: "",
         status: "active",
         assignedKeys: "0",
+        password: "",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -59,6 +60,8 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
         if (isNaN(Number(formData.assignedKeys)) || Number(formData.assignedKeys) < 0) {
             newErrors.assignedKeys = "Initial keys must be a valid number"
         }
+        if (!formData.password.trim()) newErrors.password = "Password is required"
+        else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
 
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
@@ -77,16 +80,14 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                 location: formData.location,
                 status: formData.status,
                 assignedKeys: Number(formData.assignedKeys),
+                password: formData.password,
                 // notes: "", // Add notes field if needed from form
             }
             const response: AddNDResponse = await addNationalDistributor(newDistributorData)
             
             console.log('API Response:', response) // Debug log
             
-            toast({
-                title: "Success",
-                description: response.message || "National Distributor added successfully!",
-            })
+            toast.success(response.message || "National Distributor added successfully!")
             
             // Set the ND info with password to show in modal
             if (response.nd) {
@@ -94,17 +95,13 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                     id: response.nd.id,
                     name: response.nd.name,
                     email: response.nd.email,
-                    defaultPassword: response.nd.defaultPassword,
+                    password: formData.password,
                     companyName: response.nd.companyName || formData.name,
                 })
                 setShowPasswordModal(true)
             } else {
                 console.error('No ND data in response:', response)
-                toast({
-                    title: "Warning",
-                    description: "ND created but credentials not returned. Please check manually.",
-                    variant: "destructive",
-                })
+                toast.warning("ND created but credentials not returned. Please check manually.")
             }
             
             // The backend should return the full NationalDistributor object with ID, createdAt, etc.
@@ -126,11 +123,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
             // Do not close the main modal yet, let user see password first
         } catch (error: any) {
             console.error("Failed to add national distributor:", error)
-            toast({
-                title: "Error",
-                description: error.response?.data?.message || "Failed to add national distributor.",
-                variant: "destructive",
-            })
+            toast.error(error.response?.data?.message || "Failed to add national distributor.")
         } finally {
             setIsSubmitting(false)
         }
@@ -144,6 +137,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
             phone: "",
             status: "active",
             assignedKeys: "0",
+            password: "",
         })
         setErrors({})
         onOpenChange(false)
@@ -292,6 +286,21 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                                         placeholder="0"
                                     />
                                     {errors.assignedKeys && <p className="text-xs text-red-500">{errors.assignedKeys}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="password" className="text-sm font-medium">
+                                        Set Password *
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        type="text"
+                                        value={formData.password}
+                                        onChange={(e) => handleInputChange("password", e.target.value)}
+                                        className={`border-electric-orange/30 focus:border-electric-orange focus:ring-electric-orange/20 ${errors.password ? "border-red-500" : ""}`}
+                                        placeholder="Enter password for ND account"
+                                    />
+                                    {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
                                 </div>
                             </div>
                         </div>

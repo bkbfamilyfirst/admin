@@ -20,7 +20,7 @@ interface NDCredentialsModalProps {
         id: string
         name: string
         email: string
-        defaultPassword: string
+        password: string
         companyName: string
     } | null
 }
@@ -111,7 +111,7 @@ Please change the password after first login.
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1 bg-red-50 border border-red-200 px-3 py-2 rounded">
                                         <span className="font-mono text-red-700 font-bold text-lg">
-                                            {showPassword ? ndInfo.defaultPassword : '••••••••'}
+                                            {showPassword ? ndInfo.password : '••••••••'}
                                         </span>
                                         <Button
                                             variant="ghost"
@@ -125,7 +125,7 @@ Please change the password after first login.
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => copyToClipboard(ndInfo.defaultPassword, "Password")}
+                                        onClick={() => copyToClipboard(ndInfo.password, "Password")}
                                         className="h-8 w-8 p-0"
                                     >
                                         <Copy className="h-3 w-3" />
