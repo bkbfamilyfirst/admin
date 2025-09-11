@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { KeyRound, Send, History, ArrowRight } from "lucide-react"
 import { getNationalDistributors, NationalDistributor, transferKeysToNationalDistributor, getNdAssignments, Assignment } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { formatDistanceToNowStrict } from 'date-fns'
 import { Pagination } from "@/components/ui/pagination"
 import { Calendar as CalendarIcon, Search as SearchIcon, X as XIcon, Filter as FilterIcon } from "lucide-react"
@@ -44,11 +44,7 @@ export function KeyAssignmentCard() {
       setTotalAssignments(response.total);
     } catch (err: any) {
       console.error("Failed to load recent assignments:", err);
-      toast({
-        title: "Error",
-        description: err.response?.data?.message || "Failed to load recent assignments.",
-        variant: "destructive",
-      });
+  toast.error(err.response?.data?.message || "Failed to load recent assignments.")
     } finally {
       setLoading(false);
     }
@@ -105,39 +101,24 @@ export function KeyAssignmentCard() {
 
   const handleAssignKeys = async () => {
     if (!selectedDistributor || !keyCount) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a distributor and enter the number of keys.",
-        variant: "destructive",
-      });
+  toast.error("Please select a distributor and enter the number of keys.")
       return;
     }
 
     const keys = Number(keyCount);
     if (isNaN(keys) || keys <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid number of keys (greater than 0).",
-        variant: "destructive",
-      });
+  toast.error("Please enter a valid number of keys (greater than 0).")
       return;
     }
 
     setIsAssigning(true);
     try {
       const response = await transferKeysToNationalDistributor(selectedDistributor, keys);
-      toast({
-        title: "Success",
-        description: response.message || "Keys transferred successfully!",
-      });
+  toast.success(response.message || "Keys transferred successfully!")
       setKeyCount("0"); // Reset key count
     } catch (err: any) {
       console.error("Error assigning keys:", err);
-      toast({
-        title: "Error",
-        description: err.response?.data?.message || "Failed to transfer keys.",
-        variant: "destructive",
-      });
+  toast.error(err.response?.data?.message || "Failed to transfer keys.")
     } finally {
       setIsAssigning(false);
       // After a successful assignment, refresh recent assignments and go to the first page

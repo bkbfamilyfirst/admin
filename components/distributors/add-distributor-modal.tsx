@@ -28,12 +28,14 @@ interface AddDistributorModalProps {
 export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: AddDistributorModalProps) {
     const [formData, setFormData] = useState({
         name: "",
+        username: "",
         location: "",
         email: "",
         phone: "",
         status: "active",
         assignedKeys: "0",
         password: "",
+        notes: "",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -53,6 +55,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
         const newErrors: Record<string, string> = {}
 
         if (!formData.name.trim()) newErrors.name = "Company name is required"
+        if (!formData.username.trim()) newErrors.username = "Username is required"
         if (!formData.location.trim()) newErrors.location = "Location is required"
         if (!formData.email.trim()) newErrors.email = "Email is required"
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
@@ -74,14 +77,15 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
         try {
             const newDistributorData = {
                 companyName: formData.name,
-                name: formData.name, // Assuming company name is used as contact name for now
+                name: formData.name,
+                username: formData.username,
                 email: formData.email,
                 phone: formData.phone,
                 location: formData.location,
                 status: formData.status,
                 assignedKeys: Number(formData.assignedKeys),
                 password: formData.password,
-                // notes: "", // Add notes field if needed from form
+                notes: formData.notes,
             }
             const response: AddNDResponse = await addNationalDistributor(newDistributorData)
             
@@ -95,7 +99,9 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                     id: response.nd.id,
                     name: response.nd.name,
                     email: response.nd.email,
-                    password: formData.password,
+                    username: response.nd.username,
+                    phone: response.nd.phone,
+                    password: response.nd.password || formData.password,
                     companyName: response.nd.companyName || formData.name,
                 })
                 setShowPasswordModal(true)
@@ -132,12 +138,14 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
     const handleClose = () => {
         setFormData({
             name: "",
+            username: "",
             location: "",
             email: "",
             phone: "",
             status: "active",
             assignedKeys: "0",
             password: "",
+            notes: "",
         })
         setErrors({})
         onOpenChange(false)
@@ -173,6 +181,7 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                             </h3>
 
                             <div className="grid gap-4 sm:grid-cols-2">
+                                
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="text-sm font-medium">
                                         Company Name *
@@ -186,6 +195,20 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                                         placeholder="e.g., TechGuard Solutions"
                                     />
                                     {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="username" className="text-sm font-medium">
+                                        Username *
+                                    </Label>
+                                    <Input
+                                        id="username"
+                                        value={formData.username}
+                                        onChange={(e) => handleInputChange("username", e.target.value)}
+                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.username ? "border-red-500" : ""}`}
+                                        placeholder="e.g., techguard.nd"
+                                    />
+                                    {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
                                 </div>
 
                                 <div className="space-y-2">
@@ -256,6 +279,18 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                             </h3>
 
                             <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="notes" className="text-sm font-medium">
+                                        Notes
+                                    </Label>
+                                    <Textarea
+                                        id="notes"
+                                        value={formData.notes}
+                                        onChange={(e) => handleInputChange("notes", e.target.value)}
+                                        className="border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20"
+                                        placeholder="Any additional notes..."
+                                    />
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="status" className="text-sm font-medium">
                                         Initial Status

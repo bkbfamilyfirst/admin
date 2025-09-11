@@ -17,11 +17,14 @@ interface NDCredentialsModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     ndInfo: {
-        id: string
-        name: string
-        email: string
-        password: string
-        companyName: string
+        id?: string
+        name?: string
+        username?: string
+        email?: string
+        phone?: string
+        password?: string
+        companyName?: string
+        notes?: string
     } | null
 }
 
@@ -40,7 +43,9 @@ export function NDCredentialsModal({ open, onOpenChange, ndInfo }: NDCredentials
 National Distributor Credentials:
 Name: ${ndInfo.name}
 Email: ${ndInfo.email}
-Password: ${ndInfo.defaultPassword}
+Username: ${ndInfo.username}
+Phone: ${ndInfo.phone}
+Password: ${ndInfo.password}
 Company: ${ndInfo.companyName}
 
 Please change the password after first login.
@@ -81,7 +86,7 @@ Please change the password after first login.
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => copyToClipboard(ndInfo.name, "Name")}
+                                        onClick={() => copyToClipboard(ndInfo.name ?? "", "Name")}
                                         className="h-8 w-8 p-0"
                                     >
                                         <Copy className="h-3 w-3" />
@@ -97,7 +102,39 @@ Please change the password after first login.
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => copyToClipboard(ndInfo.email, "Email")}
+                                        onClick={() => copyToClipboard(ndInfo.email ?? "", "Email")}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <Copy className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Username */}
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-600">Username:</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-900 dark:text-gray-100 font-medium">{ndInfo.username}</span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(ndInfo.username ?? "", "Username")}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <Copy className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Mobile Number */}
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-gray-600">Mobile Number:</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-900 dark:text-gray-100 font-medium">{ndInfo.phone}</span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(ndInfo.phone ?? "", "Phone")}
                                         className="h-8 w-8 p-0"
                                     >
                                         <Copy className="h-3 w-3" />
@@ -112,10 +149,58 @@ Please change the password after first login.
                                     <div className="flex items-center gap-1 bg-red-50 border border-red-200 px-3 py-2 rounded">
                                         <span className="font-mono text-red-700 font-bold text-lg">
                                             {showPassword ? ndInfo.password : '••••••••'}
+                                                    {ndInfo.phone && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-sm font-medium text-gray-600">Phone:</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-900 dark:text-gray-100 font-medium">{ndInfo.phone}</span>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => copyToClipboard(ndInfo.phone ?? "", "Phone")}
+                                                                    className="h-8 w-8 p-0"
+                                                                >
+                                                                    <Copy className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                         </span>
                                         <Button
+                                                    {...ndInfo.companyName && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-sm font-medium text-gray-600">Company Name:</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-900 dark:text-gray-100 font-medium">{ndInfo.companyName}</span>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => copyToClipboard(ndInfo.companyName ?? "", "Company Name")}
+                                                                    className="h-8 w-8 p-0"
+                                                                >
+                                                                    <Copy className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                             variant="ghost"
                                             size="sm"
+                                                    {...ndInfo.notes && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-sm font-medium text-gray-600">Notes:</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-900 dark:text-gray-100 font-medium">{ndInfo.notes}</span>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => copyToClipboard(ndInfo.notes ?? "", "Notes")}
+                                                                    className="h-8 w-8 p-0"
+                                                                >
+                                                                    <Copy className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="h-6 w-6 p-0 ml-1"
                                         >
@@ -125,7 +210,7 @@ Please change the password after first login.
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => copyToClipboard(ndInfo.password, "Password")}
+                                        onClick={() => copyToClipboard(ndInfo.password ?? "", "Password")}
                                         className="h-8 w-8 p-0"
                                     >
                                         <Copy className="h-3 w-3" />

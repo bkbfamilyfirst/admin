@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { UserCheck, UserX, Key, Activity } from "lucide-react"
 import { getAdminSummary, getNationalDistributors } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 export function DistributorsStats() {
   const [mounted, setMounted] = useState(false)
@@ -24,11 +24,7 @@ export function DistributorsStats() {
         setDistributors(distributorsRes)
       } catch (err: any) {
         setError("Failed to load distributor stats.")
-        toast({
-          title: "Error",
-          description: err.response?.data?.message || "Failed to load distributor stats.",
-          variant: "destructive",
-        });
+        toast.error(err.response?.data?.message || "Failed to load distributor stats.");
       } finally {
         setLoading(false)
       }

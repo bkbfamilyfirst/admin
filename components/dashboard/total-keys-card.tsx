@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Key, TrendingUp } from "lucide-react"
 import { getAdminSummary } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { useDashboard } from "./dashboard-context"
 
 export function TotalKeysCard() {
@@ -28,11 +28,7 @@ export function TotalKeysCard() {
         setError(null)
       } catch (err: any) {
         setError("Failed to load total keys data.")
-        toast({
-          title: "Error",
-          description: err.response?.data?.message || "Failed to load total keys data.",
-          variant: "destructive",
-        });
+        toast.error(err.response?.data?.message || "Failed to load total keys data.");
       } finally {
         setLoading(false)
       }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Clock, Calendar, AlertTriangle, CheckCircle } from "lucide-react"
 import { getKeyValidityTimeline } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { useDashboard } from "./dashboard-context"
 
 export function KeyValidityCard() {
@@ -24,11 +24,7 @@ export function KeyValidityCard() {
         setError(null)
       } catch (error: any) {
         setError("Failed to load key validity data.")
-        toast({
-          title: "Error",
-          description: error.response?.data?.message || "Failed to load key validity data.",
-          variant: "destructive",
-        });
+        toast.error(error.response?.data?.message || "Failed to load key validity data.");
       } finally {
         setLoading(false)
       }

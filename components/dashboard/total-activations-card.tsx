@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp } from "lucide-react"
 import { getAdminSummary } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 export function TotalActivationsCard() {
   const [mounted, setMounted] = useState(false)
@@ -24,11 +24,7 @@ export function TotalActivationsCard() {
         setData(res.totalActivations)
       } catch (err: any) {
         setError("Failed to load total activations data.")
-        toast({
-          title: "Error",
-          description: err.response?.data?.message || "Failed to load total activations data.",
-          variant: "destructive",
-        });
+        toast.error(err.response?.data?.message || "Failed to load total activations data.");
       } finally {
         setLoading(false)
       }

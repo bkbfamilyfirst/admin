@@ -205,8 +205,16 @@ export const transferKeysToNationalDistributor = async (ndId: string, keysToTran
       keysToTransfer,
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error transferring keys:', error);
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Response data:', error.response.data);
+      console.error('Request payload:', { ndId, keysToTransfer });
+      // toast.error(error.response?.data?.message || "Failed to transfer keys");
+    } else {
+      console.error('No response received from server.');
+    }
     throw error;
   }
 };
@@ -214,6 +222,9 @@ export const transferKeysToNationalDistributor = async (ndId: string, keysToTran
 export interface AddNDResponse {
   message: string;
   nd: {
+    password: string;
+    phone: any;
+    username: any;
     id: string;
     name: string;
     email: string;
@@ -226,11 +237,13 @@ export interface AddNDResponse {
 export const addNationalDistributor = async (distributorData: {
   companyName: string;
   name: string;
+  username: string;
   email: string;
   phone: string;
   location: string;
   status: string;
   assignedKeys: number;
+  password: string;
   notes?: string;
 }): Promise<AddNDResponse> => {
   try {

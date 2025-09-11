@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Package, ArrowRight, ArrowLeft, Archive } from "lucide-react"
 import { getKeyInventory } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 import { useDashboard } from "./dashboard-context"
 
 export function KeyInventoryCard() {
@@ -29,11 +29,7 @@ export function KeyInventoryCard() {
         setError(null);
       } catch (error: any) {
         setError("Failed to load key inventory data.");
-        toast({
-          title: "Error",
-          description: error.response?.data?.message || "Failed to load key inventory data.",
-          variant: "destructive",
-        });
+  toast.error(error.response?.data?.message || "Failed to load key inventory data.");
       } finally {
         setLoading(false);
       }

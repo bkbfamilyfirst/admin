@@ -14,7 +14,7 @@ import {
   Store
 } from "lucide-react"
 import { getAdminSummary } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 const roleMap = [
   { key: "admin", label: "Admin", icon: Crown, color: "from-electric-purple to-electric-pink" },
@@ -49,11 +49,7 @@ export function UsersPerRoleCard() {
         setData({ roles: rolesData, total: totalUsers });
       } catch (err: any) {
         setError("Failed to load users per role data.")
-        toast({
-          title: "Error",
-          description: err.response?.data?.message || "Failed to load users per role data.",
-          variant: "destructive",
-        });
+        toast.error(err.response?.data?.message || "Failed to load users per role data.");
       } finally {
         setLoading(false)
       }

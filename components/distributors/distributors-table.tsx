@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination } from "@/components/ui/pagination"
 import { Edit, MoreHorizontal, Shield, Trash2, UserCheck, UserX, Eye, KeyRound, ArrowUpDown, Ban } from "lucide-react"
 import { NationalDistributor, deactivateNationalDistributor, blockNationalDistributor, deleteNationalDistributor, editNationalDistributor } from "@/lib/api"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 interface DistributorsTableProps {
   distributors: NationalDistributor[]
@@ -100,20 +100,13 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
         }
 
         if (response) {
-          toast({
-            title: "Success",
-            description: response.message || `Distributor status updated to ${newStatus}.`,
-          });
+          toast.error(response.message || `Distributor status updated to ${newStatus}.`);
           onStatusChange(ndId, newStatus); // Update local state for immediate UI reflection
           onRefreshData(); // Refresh data from server to ensure consistency
         }
       } catch (error: any) {
         console.error(`Failed to update distributor status to ${newStatus}:`, error);
-        toast({
-          title: "Error",
-          description: error.response?.data?.message || `Failed to update distributor status to ${newStatus}.`,
-          variant: "destructive",
-        });
+        toast.error(error.response?.data?.message || `Failed to update distributor status to ${newStatus}.`);
       }
     };
 
@@ -159,19 +152,12 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
   const handleDeleteClick = async (distributor: NationalDistributor) => {
     try {
       await deleteNationalDistributor(distributor.id);
-      toast({
-        title: "Success",
-        description: `${distributor.name} deleted successfully.`,
-      });
+      toast.error(distributor.name + " deleted successfully.");
       onDelete(distributor); // Update local state for immediate UI reflection
       onRefreshData(); // Refresh data from server to ensure consistency
     } catch (error: any) {
       console.error("Failed to delete national distributor:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || `Failed to delete ${distributor.name}.`,
-        variant: "destructive",
-      });
+      toast.error(error.response?.data?.message || `Failed to delete ${distributor.name}.`)
     }
   };
 
