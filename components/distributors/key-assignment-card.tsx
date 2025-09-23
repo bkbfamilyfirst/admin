@@ -265,11 +265,11 @@ export function KeyAssignmentCard() {
             recentAssignments.map((assignment) => (
               <div
                 key={assignment.transferId}
-                className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 dark:bg-gray-800/50 backdrop-blur-sm hover:scale-[1.02] transition-transform duration-200"
+                className="flex items-center justify-between p-3 rounded-lg bg-gray-200 dark:bg-gray-800/50 backdrop-blur-sm hover:scale-[1.02] transition-transform duration-200"
             >
               <div className="flex flex-col">
-                  <span className="font-semibold text-base text-white">{assignment.to?.name || 'N/A'}</span>
-                  <span className="text-sm text-gray-400 mt-1">
+                  <span className="font-semibold text-base text-gray-800">{assignment.to?.name || 'N/A'}</span>
+                  <span className="text-sm text-gray-500 mt-1">
                     {formatDistanceToNowStrict(new Date(assignment.date), { addSuffix: true })}
                   </span>
               </div>

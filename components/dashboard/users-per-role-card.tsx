@@ -1,5 +1,6 @@
-'use client'
+"use client"
 import { useEffect, useState } from "react"
+import { useRouter } from 'next/navigation'
 import {
   Card,
   CardContent,
@@ -32,6 +33,7 @@ export function UsersPerRoleCard() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
@@ -82,7 +84,12 @@ export function UsersPerRoleCard() {
   if (!data) return null
 
   return (
-    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-electric-purple/10 to-electric-blue/10 hover:shadow-xl transition-all duration-300 hover:scale-105">
+    <Card
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push('/roles') }}
+      className="relative overflow-hidden border-0 bg-gradient-to-br from-electric-purple/10 to-electric-blue/10 hover:shadow-xl transition-all duration-300 hover:scale-105"
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-xl">
           <div className="rounded-full p-2 bg-gradient-to-r from-electric-purple to-electric-blue">
@@ -98,10 +105,15 @@ export function UsersPerRoleCard() {
           {data.roles?.map((role: any) => {
             const roleConfig = roleMap.find(item => item.label === role.name);
             const IconComponent = roleConfig?.icon;
+            const roleKey = roleConfig?.key || '';
             return (
               <div
                 key={role.name}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border hover:scale-105 transition-transform duration-200"
+                role="button"
+                tabIndex={0}
+                onClick={(e) => { e.stopPropagation(); roleKey && router.push(`/roles/${roleKey}`) }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); roleKey && router.push(`/roles/${roleKey}`) } }}
+                className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border hover:scale-105 transition-transform duration-200 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className={`rounded-full p-2 bg-gradient-to-r ${roleConfig?.color}`}>

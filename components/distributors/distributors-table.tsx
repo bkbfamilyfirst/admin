@@ -308,22 +308,6 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View</span>
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-electric-green opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <KeyRound className="h-4 w-4" />
-                          <span className="sr-only">Assign Keys</span>
-                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button size="icon" variant="ghost" className="h-8 w-8 text-electric-purple">

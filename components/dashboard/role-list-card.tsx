@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +25,7 @@ export const RoleListCard: React.FC<RoleListCardProps> = ({ role, title }) => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +53,13 @@ export const RoleListCard: React.FC<RoleListCardProps> = ({ role, title }) => {
   }, [role, page]);
 
   return (
-    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-electric-purple/10 to-electric-blue/10 hover:shadow-xl transition-all duration-300 hover:scale-105 px-2 pb-2">
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => router.push(`/roles/${role}`)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push(`/roles/${role}`) }}
+      className="relative overflow-hidden border-0 bg-gradient-to-br from-electric-purple/10 to-electric-blue/10 hover:shadow-xl transition-all duration-300 hover:scale-105 px-2 pb-2"
+    >
       <div className="p-6 pb-4 flex flex-row items-center justify-between">
         <h2 className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-electric-purple to-electric-blue bg-clip-text text-transparent">
           {title}
@@ -85,7 +93,7 @@ export const RoleListCard: React.FC<RoleListCardProps> = ({ role, title }) => {
                 variant="outline"
                 className="rounded-full px-6 py-2 font-semibold"
                 disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={(e) => { e.stopPropagation(); setPage((p) => Math.max(1, p - 1)) }}
               >
                 Previous
               </Button>
@@ -96,7 +104,7 @@ export const RoleListCard: React.FC<RoleListCardProps> = ({ role, title }) => {
                 variant="outline"
                 className="rounded-full px-6 py-2 font-semibold"
                 disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={(e) => { e.stopPropagation(); setPage((p) => Math.min(totalPages, p + 1)) }}
               >
                 Next
               </Button>

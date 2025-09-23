@@ -33,13 +33,9 @@ export default function Home() {
           <KeyValidityCard />
         </div>
 
-        {/* Fourth Row - Recent Entries by Role */}
-        <div className="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-2">
-          <RoleListCard role="nd" title="National Distributors" />
-          <RoleListCard role="ss" title="State Supervisors" />
-          <RoleListCard role="db" title="Distributors" />
-          <RoleListCard role="retailer" title="Retailers" />
-        </div>
+        {/* Fourth Row - (Removed detailed role lists from homepage)
+            UsersPerRoleCard now links to dedicated role list pages under /roles/[role]
+        */}
       </div>
     </DashboardProvider>
   )

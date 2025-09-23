@@ -6,15 +6,6 @@ export interface LastKeyGeneration {
   generatedAt: string;
 }
 
-export const getLastKeyGeneration = async (): Promise<LastKeyGeneration> => {
-  try {
-    const response = await api.get('/admin/last-key-generation');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching last key generation:', error);
-    throw error;
-  }
-};
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.familyfirst.com';
@@ -83,29 +74,11 @@ api.interceptors.response.use(
 /**
  * Fetch paginated list for ND, SS, DB, Retailer roles
  */
-export const getRoleListPaginated = async (
-  role: "nd" | "ss" | "db" | "retailer",
-  page: number = 1,
-  limit: number = 10
-) => {
-  const endpointMap = {
-    nd: "/admin/nd-list-paginated",
-    ss: "/admin/ss-list-paginated",
-    db: "/admin/db-list-paginated",
-    retailer: "/admin/retailer-list-paginated",
-  };
-  const endpoint = endpointMap[role];
-  try {
-    console.log(`${API_BASE_URL}${endpoint}`)
-    const response = await api.get(`${API_BASE_URL}${endpoint}`, {
-      params: { page, limit },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching ${role} list:`, error);
-    throw error;
-  }
-};
+export interface PaginatedRoleList {
+  entries: any[];
+  totalPages: number;
+  total?: number;
+}
 
 export interface NationalDistributor {
   id: string;
@@ -120,6 +93,34 @@ export interface NationalDistributor {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface SanitizedUser {
+  id?: string;
+  _id?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  assignedKeys?: number;
+  usedKeys?: number;
+  receivedKeys?: number;
+  transferredKeys?: number;
+  companyName?: string;
+  address?: string;
+  status?: string;
+  bio?: string;
+  notes?: string;
+  createdBy?: string;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Generic shape for role-edit responses: { message, <roleKey>: SanitizedUser } */
+export type EditRoleResponse = { message: string; [k: string]: any };
 
 export interface AdminSummary {
   totalKeys: {
@@ -157,6 +158,156 @@ export interface AdminSummary {
   retailer: number;
   admin: number;
 }
+
+export interface AddNDResponse {
+  message: string;
+  nd: {
+    password: string;
+    phone: any;
+    username: any;
+    id: string;
+    name: string;
+    email: string;
+    defaultPassword: string;
+    companyName: string;
+    notes: string;
+  };
+}
+
+export interface Assignment {
+  transferId: string;
+  from: {
+    id: string;
+    name: string;
+    role: string;
+  } | null;
+  to: {
+    id: string;
+    name: string;
+    role: string;
+  } | null;
+  count: number;
+  date: string;
+}
+
+export interface KeyTransferLog {
+  transferId: string;
+  timestamp: string;
+  from: {
+    id: string;
+    name: string;
+    role: string;
+  } | null;
+  to: {
+    id: string;
+    name: string;
+    role: string;
+  } | null;
+  count: number;
+  status: string;
+  type: string;
+  notes?: string;
+}
+
+export interface AdminProfile {
+  _id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  role: string;
+  address: string;
+  assignedKeys: number;
+  usedKeys: number;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
+  status: string;
+  notes: string;
+  bio: string;
+}
+
+export const getLastKeyGeneration = async (): Promise<LastKeyGeneration> => {
+  try {
+    const response = await api.get('/admin/last-key-generation');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching last key generation:', error);
+    throw error;
+  }
+};
+
+export const getRoleListPaginated = async (
+  role: "admin" | "nd" | "ss" | "db" | "retailer",
+  page: number = 1,
+  limit: number = 10,
+  filters?: {
+    search?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }
+): Promise<PaginatedRoleList> => {
+  const endpointMap: Record<string, string> = {
+    nd: "/admin/nd-list-paginated",
+    ss: "/admin/ss-list-paginated",
+    db: "/admin/db-list-paginated",
+    retailer: "/admin/retailer-list-paginated",
+    admin: "/admin/admin-list-paginated",
+  };
+  const endpoint = endpointMap[role];
+  try {
+    // Use configured axios instance so baseURL and interceptors apply
+    const params: Record<string, any> = { page, limit };
+    if (filters) {
+      if (filters.search) params.search = filters.search;
+      if (filters.status) params.status = filters.status;
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+      if (filters.sortBy) params.sortBy = filters.sortBy;
+      if (filters.sortOrder) params.sortOrder = filters.sortOrder;
+    }
+
+    const response = await api.get(endpoint, { params });
+
+    // Normalize response shape to { entries, totalPages }
+    const data = response.data;
+    if (!data) {
+      return { entries: [], totalPages: 1 };
+    }
+
+    // If backend already returns { entries, totalPages }
+    if (Array.isArray(data.entries) || typeof data.totalPages === 'number') {
+      return {
+        entries: Array.isArray(data.entries) ? data.entries : [],
+        totalPages: data.totalPages || 1,
+        total: data.total,
+      };
+    }
+
+    // Some endpoints might return { entries: [...], totalPages } directly at root
+    // Or return an array directly
+    if (Array.isArray(data)) {
+      return { entries: data, totalPages: 1 };
+    }
+
+    // Fallback: try common fields
+    const entries = data.entries || data.data || data.items || [];
+    const totalPages = data.totalPages || Math.ceil((data.total || entries.length) / limit) || 1;
+    return { entries, totalPages, total: data.total };
+  } catch (error) {
+    console.error(`Error fetching ${role} list:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Sanitized user object returned by admin edit endpoints.
+ * Fields are optional because different roles may include different fields.
+ */
 
 export const getAdminSummary = async (): Promise<AdminSummary> => {
   try {
@@ -219,21 +370,6 @@ export const transferKeysToNationalDistributor = async (ndId: string, keysToTran
   }
 };
 
-export interface AddNDResponse {
-  message: string;
-  nd: {
-    password: string;
-    phone: any;
-    username: any;
-    id: string;
-    name: string;
-    email: string;
-    defaultPassword: string;
-    companyName: string;
-    notes: string;
-  };
-}
-
 export const addNationalDistributor = async (distributorData: {
   companyName: string;
   name: string;
@@ -255,9 +391,12 @@ export const addNationalDistributor = async (distributorData: {
   }
 };
 
-export const editNationalDistributor = async (ndId: string, updatedData: Partial<NationalDistributor>) => {
+export const editNationalDistributor = async (ndId: string, updatedData: Partial<NationalDistributor & { password?: string }>): Promise<EditRoleResponse> => {
   try {
-    const response = await api.patch(`/admin/nd/${ndId}`, updatedData);
+    // prevent accidental username updates
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/nd/${ndId}`, safeData);
     return response.data;
   } catch (error) {
     console.error('Error editing national distributor:', error);
@@ -295,40 +434,80 @@ export const deleteNationalDistributor = async (ndId: string) => {
   }
 };
 
-export interface Assignment {
-  transferId: string;
-  from: {
-    id: string;
-    name: string;
-    role: string;
-  } | null;
-  to: {
-    id: string;
-    name: string;
-    role: string;
-  } | null;
-  count: number;
-  date: string;
-}
+/**
+ * Edit other user roles (SS, DB, Retailer, Parent)
+ * These endpoints share the same contract: PATCH /admin/:role/:id
+ */
+export const editSS = async (id: string, updatedData: Partial<SanitizedUser & { password?: string }>): Promise<EditRoleResponse> => {
+  try {
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/ss/${id}`, safeData);
+    return response.data as EditRoleResponse;
+  } catch (error) {
+    console.error('Error editing SS user:', error);
+    throw error;
+  }
+};
 
-export interface KeyTransferLog {
-  transferId: string;
-  timestamp: string;
-  from: {
-    id: string;
-    name: string;
-    role: string;
-  } | null;
-  to: {
-    id: string;
-    name: string;
-    role: string;
-  } | null;
-  count: number;
-  status: string;
-  type: string;
-  notes?: string;
-}
+export const editDB = async (id: string, updatedData: Partial<SanitizedUser & { password?: string }>): Promise<EditRoleResponse> => {
+  try {
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/db/${id}`, safeData);
+    return response.data as EditRoleResponse;
+  } catch (error) {
+    console.error('Error editing DB user:', error);
+    throw error;
+  }
+};
+
+export const editRetailer = async (id: string, updatedData: Partial<SanitizedUser & { password?: string }>): Promise<EditRoleResponse> => {
+  try {
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/retailer/${id}`, safeData);
+    return response.data as EditRoleResponse;
+  } catch (error) {
+    console.error('Error editing retailer user:', error);
+    throw error;
+  }
+};
+
+export const editParent = async (id: string, updatedData: Partial<SanitizedUser & { password?: string }>): Promise<EditRoleResponse> => {
+  try {
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/parent/${id}`, safeData);
+    return response.data as EditRoleResponse;
+  } catch (error) {
+    console.error('Error editing parent user:', error);
+    throw error;
+  }
+};
+
+export const editAdmin = async (id: string, updatedData: Partial<SanitizedUser & { password?: string }>): Promise<EditRoleResponse> => {
+  try {
+    const { username, ...safeData } = updatedData as any;
+    const response = await api.patch(`/admin/admin/${id}`, safeData);
+    return response.data as EditRoleResponse;
+  } catch (error) {
+    console.error('Error editing admin user:', error);
+    throw error;
+  }
+};
+
+/**
+ * Admin-triggered reset password for any user. Returns plaintext password once.
+ * POST /admin/reset-password/:id
+ */
+export const resetPasswordForUser = async (id: string) => {
+  try {
+    const response = await api.post(`/admin/reset-password/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error resetting user password:', error);
+    throw error;
+  }
+};
+
+export { api };
 
 export const getNdAssignments = async (page: number = 1, limit: number = 10, startDate: string = '', endDate: string = '', search: string = ''): Promise<{ message: string; assignments: Assignment[], total: number }> => {
   try {
@@ -399,25 +578,6 @@ export const getTransferStats = async () => {
     throw error;
   }
 };
-
-export interface AdminProfile {
-  _id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  address: string;
-  assignedKeys: number;
-  usedKeys: number;
-  createdAt: string;
-  updatedAt: string;
-  lastLogin?: string;
-  status: string;
-  notes: string;
-  bio: string;
-}
 
 export const getAdminProfile = async (): Promise<AdminProfile> => {
   try {

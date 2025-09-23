@@ -67,7 +67,7 @@ export function DistributorsStats() {
     },
     {
       title: "Inactive ND",
-      value: inactiveNDs > 0 ? inactiveNDs.toLocaleString() : "N/A",
+      value: inactiveNDs > 0 ? inactiveNDs.toLocaleString() : "0",
       change: "-",
       icon: UserX,
       color: "from-electric-orange to-electric-pink",

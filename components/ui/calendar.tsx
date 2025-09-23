@@ -54,8 +54,14 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        // react-day-picker expects a `Chevron` component which receives an `orientation` prop
+        // map it to lucide icons depending on orientation (left/right)
+        Chevron: (({ orientation, ...props }: any) =>
+          orientation === "right" ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )) as any,
       }}
       {...props}
     />
