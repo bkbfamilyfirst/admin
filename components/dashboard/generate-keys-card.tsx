@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import { useDashboard } from "./dashboard-context"
 
 export function GenerateKeysCard() {
-  const [keyCount, setKeyCount] = useState("100")
+  const [keyCount, setKeyCount] = useState("10")
   const [isGenerating, setIsGenerating] = useState(false)
   const [lastGen, setLastGen] = useState<LastKeyGeneration | null>(null)
   const [lastGenLoading, setLastGenLoading] = useState(true)
