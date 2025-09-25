@@ -52,9 +52,9 @@ export function GenerateKeysCard() {
     setIsGenerating(true)
     try {
       const response = await generateKeys(count, 16) // 16 character keys
-  console.log("Triggering toast: success", count)
-  toast.success(`Successfully generated ${count} keys!`)
-      
+      console.log("Triggering toast: success", count)
+      toast.success(`Successfully generated ${count} keys!`)
+      console.log("Generated keys response:", response)
       // Refresh all dashboard components
       refreshDashboard()
       
