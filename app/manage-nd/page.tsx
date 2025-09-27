@@ -14,7 +14,7 @@ import { toast } from "@/components/ui/use-toast"
 // interface Distributor {
 //   id: string
 //   name: string
-//   location: string
+//   address: string
 //   contact: string
 //   email: string
 //   phone: string
@@ -30,7 +30,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND001",
 //     name: "TechGuard Solutions",
-//     location: "New York, USA",
+//     address: "New York, USA",
 //     contact: "John Smith",
 //     email: "john@techguard.com",
 //     phone: "+1 (555) 123-4567",
@@ -42,7 +42,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND002",
 //     name: "SecureFamily Networks",
-//     location: "London, UK",
+//     address: "London, UK",
 //     contact: "Emma Johnson",
 //     email: "emma@securefamily.com",
 //     phone: "+44 20 1234 5678",
@@ -54,7 +54,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND003",
 //     name: "KidSafe Technologies",
-//     location: "Sydney, Australia",
+//     address: "Sydney, Australia",
 //     contact: "Michael Wong",
 //     email: "michael@kidsafe.com",
 //     phone: "+61 2 9876 5432",
@@ -66,7 +66,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND004",
 //     name: "ParentControl Systems",
-//     location: "Toronto, Canada",
+//     address: "Toronto, Canada",
 //     contact: "Sarah Miller",
 //     email: "sarah@parentcontrol.com",
 //     phone: "+1 (416) 987-6543",
@@ -78,7 +78,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND005",
 //     name: "FamilyShield Inc.",
-//     location: "Berlin, Germany",
+//     address: "Berlin, Germany",
 //     contact: "Hans Schmidt",
 //     email: "hans@familyshield.com",
 //     phone: "+49 30 1234 5678",
@@ -90,7 +90,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND006",
 //     name: "SafeKids Digital",
-//     location: "Tokyo, Japan",
+//     address: "Tokyo, Japan",
 //     contact: "Yuki Tanaka",
 //     email: "yuki@safekids.jp",
 //     phone: "+81 3 1234 5678",
@@ -102,7 +102,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND007",
 //     name: "Guardian Tech Solutions",
-//     location: "Mumbai, India",
+//     address: "Mumbai, India",
 //     contact: "Raj Patel",
 //     email: "raj@guardiantech.in",
 //     phone: "+91 22 1234 5678",
@@ -114,7 +114,7 @@ import { toast } from "@/components/ui/use-toast"
 //   {
 //     id: "ND008",
 //     name: "ProtectFamily Corp",
-//     location: "São Paulo, Brazil",
+//     address: "São Paulo, Brazil",
 //     contact: "Maria Silva",
 //     email: "maria@protectfamily.br",
 //     phone: "+55 11 1234 5678",
@@ -163,11 +163,11 @@ export default function DistributorsPage() {
     try {
       const response = await editNationalDistributor(updatedDistributor.id, {
         name: updatedDistributor.name,
-        location: updatedDistributor.location,
+        address: updatedDistributor.address,
         email: updatedDistributor.email,
         phone: updatedDistributor.phone,
         status: updatedDistributor.status,
-        assignedKeys: updatedDistributor.assignedKeys,
+        receivedKeys: updatedDistributor.receivedKeys,
       });
       toast({
         title: "Success",

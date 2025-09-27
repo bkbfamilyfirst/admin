@@ -119,6 +119,7 @@ export default function RoleList({ role }: Props) {
 
   const validateEdit = (values: any) => {
     const errs: Record<string, string> = {};
+    if (!values.name || !values.name.trim()) errs.name = "Name is required";
     if (!values.companyName || !values.companyName.trim()) errs.companyName = "Company name is required";
     if (!values.email || !values.email.trim()) errs.email = "Email is required";
     else {
@@ -127,7 +128,6 @@ export default function RoleList({ role }: Props) {
       if (!re.test(values.email)) errs.email = "Enter a valid email";
     }
     if (!values.phone || !values.phone.trim()) errs.phone = "Phone is required";
-    // Address is required (was previously called 'location')
     if (!values.address || !values.address.trim()) errs.address = "Address is required";
     setEditErrors(errs);
     return Object.keys(errs).length === 0;
@@ -136,14 +136,13 @@ export default function RoleList({ role }: Props) {
   const openEdit = (entry: any) => {
     setEditValues({
       id: entry._id || entry.id,
-      name: entry.name,
-      companyName: entry.companyName ?? entry.name,
-      location: entry.location ?? "",
+      name: entry.name ?? "",
+      companyName: entry.companyName ?? entry.name ?? "",
       address: entry.address ?? entry.addressLine ?? "",
       email: entry.email,
       phone: entry.phone,
       status: entry.status,
-      keysAssigned: entry.keysAssigned ?? entry.assignedKeys ?? entry.transferredKeys ?? 0,
+      keysAssigned: entry.keysAssigned ?? entry.receivedKeys ?? entry.transferredKeys ?? 0,
     });
     setEditOpen(true);
     setEditErrors({});
@@ -350,7 +349,7 @@ export default function RoleList({ role }: Props) {
                         <td className="p-3 text-gray-700 dark:text-gray-300">{e.phone}</td>
                         <td className="p-3 text-gray-900 dark:text-gray-100">{e.transferredKeys ?? "-"}</td>
                         <td className="p-3 text-gray-900 dark:text-gray-100">{e.receivedKeys ?? "-"}</td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">{e.address ?? e.addressLine ?? e.location ?? "-"}</td>
+                        <td className="p-3 text-gray-700 dark:text-gray-300">{e.address ?? e.addressLine ?? e.address ?? "-"}</td>
                         <td className="p-3">
                           <span
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
@@ -559,6 +558,11 @@ export default function RoleList({ role }: Props) {
               <section>
                 <h4 className="text-sm font-medium mb-3">Contact Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium">Name *</label>
+                    <Input value={editValues?.name ?? ""} className={editErrors.name ? 'border-red-600 ring-1 ring-red-600' : ''} onChange={(e) => { const v = (e.target as HTMLInputElement).value; setEditValues((s: any) => ({ ...s, name: v })); validateEdit({ ...editValues, name: v }); }} />
+                    {editErrors.name ? <p className="text-xs text-red-600 mt-1">{editErrors.name}</p> : null}
+                  </div>
                   <div>
                     <label className="text-xs font-medium">Email Address *</label>
                     <Input value={editValues?.email ?? ""} className={editErrors.email ? 'border-red-600 ring-1 ring-red-600' : ''} onChange={(e) => { const v = (e.target as HTMLInputElement).value; setEditValues((s: any) => ({ ...s, email: v })); validateEdit({ ...editValues, email: v }); }} />

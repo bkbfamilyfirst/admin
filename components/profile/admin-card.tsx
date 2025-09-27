@@ -123,7 +123,7 @@ export function AdminCard() {
                         <div className="text-center p-3 rounded-lg bg-gradient-to-r from-electric-green/10 to-electric-cyan/10">
                             <Key className="h-5 w-5 text-electric-green mx-auto mb-1" />
                             <div className="text-lg font-bold bg-gradient-to-r from-electric-green to-electric-cyan bg-clip-text text-transparent">
-                                {profile.assignedKeys?.toLocaleString() ?? 0}
+                                {profile.receivedKeys?.toLocaleString() ?? 0}
                             </div>
                             <div className="text-xs text-gray-500">Keys Managed</div>
                         </div>

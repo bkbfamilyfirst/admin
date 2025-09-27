@@ -85,10 +85,10 @@ export interface NationalDistributor {
   name: string;
   email: string;
   phone: string;
-  location: string;
+  address: string;
   status: string;
-  assignedKeys: number;
-  usedKeys: number;
+  receivedKeys: number;
+  transferredKeys: number;
   balance: number;
   createdAt: string;
   updatedAt: string;
@@ -104,8 +104,6 @@ export interface SanitizedUser {
   email?: string;
   phone?: string;
   role?: string;
-  assignedKeys?: number;
-  usedKeys?: number;
   receivedKeys?: number;
   transferredKeys?: number;
   companyName?: string;
@@ -218,8 +216,8 @@ export interface AdminProfile {
   phone: string;
   role: string;
   address: string;
-  assignedKeys: number;
-  usedKeys: number;
+  receivedKeys: number;
+  transferredKeys: number;
   createdAt: string;
   updatedAt: string;
   lastLogin?: string;
@@ -376,9 +374,9 @@ export const addNationalDistributor = async (distributorData: {
   username: string;
   email: string;
   phone: string;
-  location: string;
+  address: string;
   status: string;
-  assignedKeys: number;
+  receivedKeys: number;
   password: string;
   notes?: string;
 }): Promise<AddNDResponse> => {

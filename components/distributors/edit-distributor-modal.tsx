@@ -32,11 +32,11 @@ export function EditDistributorModal({
 }: EditDistributorModalProps) {
     const [formData, setFormData] = useState({
         name: "",
-        location: "",
+        address: "",
         email: "",
         phone: "",
         status: "active",
-        assignedKeys: "0",
+        receivedKeys: "0",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -45,11 +45,11 @@ export function EditDistributorModal({
         if (distributor) {
             setFormData({
                 name: distributor.name,
-                location: distributor.location,
+                address: distributor.address,
                 email: distributor.email,
                 phone: distributor.phone,
                 status: distributor.status,
-                assignedKeys: distributor.assignedKeys.toString(),
+                receivedKeys: (distributor.receivedKeys ?? 0).toString(),
             })
         }
     }, [distributor])
@@ -66,12 +66,12 @@ export function EditDistributorModal({
         const newErrors: Record<string, string> = {}
 
         if (!formData.name.trim()) newErrors.name = "Company name is required"
-        if (!formData.location.trim()) newErrors.location = "Location is required"
+        if (!formData.address.trim()) newErrors.address = "address is required"
         if (!formData.email.trim()) newErrors.email = "Email is required"
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
         if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-        if (isNaN(Number(formData.assignedKeys)) || Number(formData.assignedKeys) < 0) {
-            newErrors.assignedKeys = "Keys assigned must be a valid number"
+        if (isNaN(Number(formData.receivedKeys)) || Number(formData.receivedKeys) < 0) {
+            newErrors.receivedKeys = "Keys assigned must be a valid number"
         }
 
         setErrors(newErrors)
@@ -84,12 +84,12 @@ export function EditDistributorModal({
         const updatedDistributor: NationalDistributor = {
             ...distributor,
             name: formData.name,
-            location: formData.location,
+            address: formData.address,
             email: formData.email,
             phone: formData.phone,
             status: formData.status,
-            assignedKeys: Number(formData.assignedKeys),
-            balance: Number(formData.assignedKeys) - distributor.usedKeys,
+            receivedKeys: Number(formData.receivedKeys),
+            balance: Number(formData.receivedKeys) - distributor.transferredKeys,
         }
 
         onEditDistributor(updatedDistributor)
@@ -126,7 +126,7 @@ export function EditDistributorModal({
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="edit-name" className="text-sm font-medium">
-                                    Company Name *
+                                    Name *
                                 </Label>
                                 <Input
                                     id="edit-name"
@@ -140,18 +140,18 @@ export function EditDistributorModal({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="edit-location" className="text-sm font-medium">
-                                    Location *
+                                <Label htmlFor="edit-address" className="text-sm font-medium">
+                                    address *
                                 </Label>
                                 <Input
-                                    id="edit-location"
-                                    value={formData.location}
-                                    onChange={(e) => handleInputChange("location", e.target.value)}
-                                    className={`border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 ${errors.location ? "border-red-500" : ""
+                                    id="edit-address"
+                                    value={formData.address}
+                                    onChange={(e) => handleInputChange("address", e.target.value)}
+                                    className={`border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 ${errors.address ? "border-red-500" : ""
                                         }`}
                                     placeholder="e.g., New York, USA"
                                 />
-                                {errors.location && <p className="text-xs text-red-500">{errors.location}</p>}
+                                {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
                             </div>
                         </div>
                     </div>
@@ -222,20 +222,20 @@ export function EditDistributorModal({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="edit-assignedKeys" className="text-sm font-medium">
+                                <Label htmlFor="edit-receivedKeys" className="text-sm font-medium">
                                     Keys Assigned
                                 </Label>
                                 <Input
-                                    id="edit-assignedKeys"
+                                    id="edit-receivedKeys"
                                     type="number"
                                     min="0"
-                                    value={formData.assignedKeys}
-                                    onChange={(e) => handleInputChange("assignedKeys", e.target.value)}
-                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.assignedKeys ? "border-red-500" : ""
+                                    value={formData.receivedKeys}
+                                    onChange={(e) => handleInputChange("receivedKeys", e.target.value)}
+                                    className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.receivedKeys ? "border-red-500" : ""
                                         }`}
                                     placeholder="0"
                                 />
-                                {errors.assignedKeys && <p className="text-xs text-red-500">{errors.assignedKeys}</p>}
+                                {errors.receivedKeys && <p className="text-xs text-red-500">{errors.receivedKeys}</p>}
                             </div>
                         </div>
                     </div>

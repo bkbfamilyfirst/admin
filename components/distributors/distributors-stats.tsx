@@ -53,8 +53,8 @@ export function DistributorsStats() {
   // Calculate stats from distributors data
   const activeNDs = distributors.filter(d => d.status === 'active').length
   const inactiveNDs = distributors.filter(d => d.status === 'inactive' || d.status === 'blocked').length
-  const totalKeysAssigned = distributors.reduce((sum, d) => sum + (d.assignedKeys || 0), 0)
-  const totalKeysUsed = distributors.reduce((sum, d) => sum + (d.usedKeys || 0), 0)
+  const totalKeysAssigned = distributors.reduce((sum, d) => sum + (d.receivedKeys || 0), 0)
+  const totalKeysUsed = distributors.reduce((sum, d) => sum + (d.transferredKeys || 0), 0)
   const activationRate = totalKeysAssigned > 0 ? Math.round((totalKeysUsed / totalKeysAssigned) * 100) : 0
 
   const stats = [

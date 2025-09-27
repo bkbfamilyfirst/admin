@@ -34,7 +34,7 @@ export default function LoginPage() {
       return
     }
     try {
-      const res = await api.post("/auth/login", { identifier, password })
+      const res = await api.post("/auth/login", { identifier, password, role: 'admin' })
       if (res.data.accessToken) {
         localStorage.setItem("accessToken", res.data.accessToken)
         // Optionally store user info in context or localStorage

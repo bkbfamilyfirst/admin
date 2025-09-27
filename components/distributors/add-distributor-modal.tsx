@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { UserPlus, Save, X, Copy } from "lucide-react"
 import { NationalDistributor, addNationalDistributor, AddNDResponse } from "@/lib/api"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { NDCredentialsModal } from "./nd-credentials-modal"
 
@@ -26,14 +27,16 @@ interface AddDistributorModalProps {
 }
 
 export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: AddDistributorModalProps) {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
+        companyName: "",
         username: "",
-        location: "",
+        address: "",
         email: "",
         phone: "",
         status: "active",
-        assignedKeys: "0",
+        receivedKeys: "0",
         password: "",
         notes: "",
     })
@@ -54,14 +57,15 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
 
-        if (!formData.name.trim()) newErrors.name = "Company name is required"
+        if (!formData.name.trim()) newErrors.name = "Name is required"
+        if (!formData.companyName.trim()) newErrors.companyName = "Company name is required"
         if (!formData.username.trim()) newErrors.username = "Username is required"
-        if (!formData.location.trim()) newErrors.location = "Location is required"
+        if (!formData.address.trim()) newErrors.address = "address is required"
         if (!formData.email.trim()) newErrors.email = "Email is required"
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
         if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-        if (isNaN(Number(formData.assignedKeys)) || Number(formData.assignedKeys) < 0) {
-            newErrors.assignedKeys = "Initial keys must be a valid number"
+        if (isNaN(Number(formData.receivedKeys)) || Number(formData.receivedKeys) < 0) {
+            newErrors.receivedKeys = "Initial keys must be a valid number"
         }
         if (!formData.password.trim()) newErrors.password = "Password is required"
         else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
@@ -76,14 +80,14 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
         setIsSubmitting(true)
         try {
             const newDistributorData = {
-                companyName: formData.name,
                 name: formData.name,
+                companyName: formData.companyName,
                 username: formData.username,
                 email: formData.email,
                 phone: formData.phone,
-                location: formData.location,
+                address: formData.address,
                 status: formData.status,
-                assignedKeys: Number(formData.assignedKeys),
+                receivedKeys: Number(formData.receivedKeys),
                 password: formData.password,
                 notes: formData.notes,
             }
@@ -115,13 +119,13 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
             const createdDistributor: NationalDistributor = {
                 id: response.nd?.id || `nd_${Date.now()}`,
                 name: formData.name,
-                location: formData.location,
+                address: formData.address,
                 email: formData.email,
                 phone: formData.phone,
                 status: formData.status,
-                assignedKeys: Number(formData.assignedKeys),
-                usedKeys: 0,
-                balance: Number(formData.assignedKeys),
+                receivedKeys: Number(formData.receivedKeys),
+                transferredKeys: 0,
+                balance: Number(formData.receivedKeys),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             }
@@ -138,12 +142,13 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
     const handleClose = () => {
         setFormData({
             name: "",
+            companyName: "",
             username: "",
-            location: "",
+            address: "",
             email: "",
             phone: "",
             status: "active",
-            assignedKeys: "0",
+            receivedKeys: "0",
             password: "",
             notes: "",
         })
@@ -181,22 +186,32 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                             </h3>
 
                             <div className="grid gap-4 sm:grid-cols-2">
-                                
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="text-sm font-medium">
-                                        Company Name *
+                                        Name *
                                     </Label>
                                     <Input
                                         id="name"
                                         value={formData.name}
                                         onChange={(e) => handleInputChange("name", e.target.value)}
-                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.name ? "border-red-500" : ""
-                                            }`}
-                                        placeholder="e.g., TechGuard Solutions"
+                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.name ? "border-red-500" : ""}`}
+                                        placeholder="e.g., John Doe"
                                     />
                                     {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
                                 </div>
-
+                                <div className="space-y-2">
+                                    <Label htmlFor="companyName" className="text-sm font-medium">
+                                        Company Name *
+                                    </Label>
+                                    <Input
+                                        id="companyName"
+                                        value={formData.companyName}
+                                        onChange={(e) => handleInputChange("companyName", e.target.value)}
+                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.companyName ? "border-red-500" : ""}`}
+                                        placeholder="e.g., TechGuard Solutions"
+                                    />
+                                    {errors.companyName && <p className="text-xs text-red-500">{errors.companyName}</p>}
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="username" className="text-sm font-medium">
                                         Username *
@@ -210,20 +225,18 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                                     />
                                     {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
                                 </div>
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="location" className="text-sm font-medium">
-                                        Location *
+                                    <Label htmlFor="address" className="text-sm font-medium">
+                                        address *
                                     </Label>
                                     <Input
-                                        id="location"
-                                        value={formData.location}
-                                        onChange={(e) => handleInputChange("location", e.target.value)}
-                                        className={`border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 ${errors.location ? "border-red-500" : ""
-                                            }`}
+                                        id="address"
+                                        value={formData.address}
+                                        onChange={(e) => handleInputChange("address", e.target.value)}
+                                        className={`border-electric-blue/30 focus:border-electric-blue focus:ring-electric-blue/20 ${errors.address ? "border-red-500" : ""}`}
                                         placeholder="e.g., New York, USA"
                                     />
-                                    {errors.location && <p className="text-xs text-red-500">{errors.location}</p>}
+                                    {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
                                 </div>
                             </div>
                         </div>
@@ -307,20 +320,20 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="assignedKeys" className="text-sm font-medium">
-                                        Initial Keys Allocation
+                                    <Label htmlFor="receivedKeys" className="text-sm font-medium">
+                                        Initial Keys Aladdress
                                     </Label>
                                     <Input
-                                        id="assignedKeys"
+                                        id="receivedKeys"
                                         type="number"
                                         min="0"
-                                        value={formData.assignedKeys}
-                                        onChange={(e) => handleInputChange("assignedKeys", e.target.value)}
-                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.assignedKeys ? "border-red-500" : ""
+                                        value={formData.receivedKeys}
+                                        onChange={(e) => handleInputChange("receivedKeys", e.target.value)}
+                                        className={`border-electric-purple/30 focus:border-electric-purple focus:ring-electric-purple/20 ${errors.receivedKeys ? "border-red-500" : ""
                                             }`}
                                         placeholder="0"
                                     />
-                                    {errors.assignedKeys && <p className="text-xs text-red-500">{errors.assignedKeys}</p>}
+                                    {errors.receivedKeys && <p className="text-xs text-red-500">{errors.receivedKeys}</p>}
                                 </div>
 
                                 <div className="space-y-2">
@@ -364,7 +377,8 @@ export function AddDistributorModal({ open, onOpenChange, onAddDistributor }: Ad
                     setShowPasswordModal(open)
                     if (!open) {
                         setCreatedNDInfo(null)
-                        handleClose()
+                        handleClose();
+                        router.refresh();
                     }
                 }}
                 ndInfo={createdNDInfo}

@@ -21,7 +21,7 @@ const ITEMS_PER_PAGE = 3;
 
 export function KeyAssignmentCard() {
   const [selectedDistributor, setSelectedDistributor] = useState("")
-  const [keyCount, setKeyCount] = useState("100")
+  const [keyCount, setKeyCount] = useState("10")
   const [distributors, setDistributors] = useState<NationalDistributor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -262,9 +262,9 @@ export function KeyAssignmentCard() {
           </div>
 
           {recentAssignments.length > 0 ? (
-            recentAssignments.map((assignment) => (
+            recentAssignments.map((assignment, idx) => (
               <div
-                key={assignment.transferId}
+                key={assignment.transferId || `${assignment.to?.id || 'unknown'}-${assignment.date}-${idx}`}
                 className="flex items-center justify-between p-3 rounded-lg bg-gray-200 dark:bg-gray-800/50 backdrop-blur-sm hover:scale-[1.02] transition-transform duration-200"
             >
               <div className="flex flex-col">

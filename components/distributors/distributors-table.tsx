@@ -26,7 +26,7 @@ interface DistributorsTableProps {
   onRefreshData: () => void
 }
 
-const ITEMS_PER_PAGE = 5
+const ITEMS_PER_PAGE = 10
 
 export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChange, onRefreshData }: DistributorsTableProps) {
   const [sortColumn, setSortColumn] = useState("name")
@@ -213,7 +213,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">{distributor.name}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{distributor.email}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">{distributor.location}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">{distributor.address}</p>
                 </div>
 
                 {/* Key Usage */}
@@ -221,7 +221,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Key Usage</span>
                     <span className="text-sm font-bold text-electric-purple">
-                      {distributor.usedKeys} / {distributor.assignedKeys}
+                      {distributor.transferredKeys} / {distributor.receivedKeys}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
@@ -229,14 +229,14 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                       className="bg-gradient-to-r from-electric-purple to-electric-blue h-2 rounded-full"
                       style={{
                         width:
-                          distributor.assignedKeys > 0
-                            ? `${(distributor.usedKeys / distributor.assignedKeys) * 100}%`
+                          distributor.receivedKeys > 0
+                            ? `${(distributor.transferredKeys / distributor.receivedKeys) * 100}%`
                             : "0%",
                       }}
                     ></div>
                   </div>
                   <div className="flex justify-between mt-2 text-xs text-gray-500">
-                    <span>Activated: {distributor.usedKeys}</span>
+                    <span>Activated: {distributor.transferredKeys} </span>
                     <span>Balance: {distributor.balance}</span>
                   </div>
                 </div>
@@ -277,7 +277,7 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                       <ArrowUpDown className="h-3 w-3" />
                     </div>
                   </TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>address</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Keys Usage</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -296,12 +296,12 @@ export function DistributorsTable({ distributors, onEdit, onDelete, onStatusChan
                         <div className="text-xs text-gray-500">{distributor.email}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{distributor.location}</TableCell>
+                    <TableCell>{distributor.address}</TableCell>
                     <TableCell>{getStatusBadge(distributor.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-medium">
-                          {distributor.usedKeys} / {distributor.assignedKeys}
+                          {distributor.transferredKeys} / {distributor.receivedKeys}
                         </span>
                         <span className="text-xs text-electric-purple">Balance: {distributor.balance}</span>
                       </div>
